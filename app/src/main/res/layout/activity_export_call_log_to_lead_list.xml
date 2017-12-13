@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#3498db"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/exportText"
+        android:text=""
+        android:gravity="center"
+        android:textColor="#fff"
+        android:fontFamily="monospace"
+        android:textStyle="bold"
+        android:layout_marginTop="100dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        />
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="#2980b9"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:id="@+id/exportBtn"
+        android:text="Proceed ?"/>
+</RelativeLayout>
