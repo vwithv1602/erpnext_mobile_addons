@@ -1,6 +1,7 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
@@ -32,6 +33,38 @@ import static com.vavcoders.vamc.erpnextmobileaddons.GlobalVariables.menu;
 public class ExportCallLogToLeadListActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
+    public void exportCallLog(HashMap<String, Date> incomingCalls){
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        JSONObject obj = new JSONObject(incomingCalls);
+        params.put("calls", obj);
+        params.put("user", "Administrator");
+        try {
+            client.post("http://52.14.181.220/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                    try {
+                        String login_check = response.getString("message");
+//                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+//                        Toast.makeText(getApplicationContext(), "Exception", Toast.LENGTH_SHORT).show();
+
+                    }
+
+                }
+
+                public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+
+//                    Toast.makeText(getApplicationContext(), "error: ", Toast.LENGTH_SHORT).show();
+                }
+            });
+        } catch (Exception e) {
+//            Toast.makeText(getApplicationContext(), "Exception: ", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,35 +81,7 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
                 // call getLog function to get all incoming & missed call numbers
                 HashMap<String, Date> sb_incomingCalls = getCallDetails();
                 // post to api to save in lead list
-                AsyncHttpClient client = new AsyncHttpClient();
-                RequestParams params = new RequestParams();
-                JSONObject obj = new JSONObject(sb_incomingCalls);
-                params.put("calls", obj);
-                params.put("user", "Administrator");
-                try {
-                    client.post("http://192.168.0.5:8000/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
-
-                        @Override
-                        public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
-                            try {
-                                String login_check = response.getString("message");
-                                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                                Toast.makeText(getApplicationContext(), "Exception", Toast.LENGTH_SHORT).show();
-
-                            }
-
-                        }
-
-                        public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-
-                            Toast.makeText(getApplicationContext(), "error: ", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), "Exception: ", Toast.LENGTH_SHORT).show();
-                }
+                exportCallLog(sb_incomingCalls);
 
             }
         });
@@ -123,7 +128,6 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "Permission denied", Toast.LENGTH_SHORT).show();
             reloadActivity(reloadActivityAfter);
         }
-        Toast.makeText(getApplicationContext(), "In onRequestPermissionsResult: " + String.valueOf(statusCode), Toast.LENGTH_SHORT).show();
     }
 
     private HashMap<String, Date> getCallDetails() {
