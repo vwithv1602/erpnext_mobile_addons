@@ -20,9 +20,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
         android:background="#2980b9"
         android:textColor="#fff"
         android:textStyle="bold"
         android:id="@+id/exportBtn"
-        android:text="Proceed ?"/>
+        android:text="SYNC ALL NOW"/>
 </RelativeLayout>
