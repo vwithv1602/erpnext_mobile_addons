@@ -27,7 +27,6 @@ import com.loopj.android.http.RequestParams;
 import com.vavcoders.vamc.commonrest.Make;
 
 
-
 import static com.vavcoders.vamc.erpnextmobileaddons.GlobalVariables.menu;
 
 public class ExportCallLogToLeadListActivity extends AppCompatActivity {
@@ -47,24 +46,24 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // call getLog function to get all incoming & missed call numbers
-                HashMap<String,Date> sb_incomingCalls = getCallDetails();
+                HashMap<String, Date> sb_incomingCalls = getCallDetails();
                 // post to api to save in lead list
                 AsyncHttpClient client = new AsyncHttpClient();
                 RequestParams params = new RequestParams();
-                JSONObject obj=new JSONObject(sb_incomingCalls);
-                params.put("calls",obj);
-                params.put("user","Administrator");
+                JSONObject obj = new JSONObject(sb_incomingCalls);
+                params.put("calls", obj);
+                params.put("user", "Administrator");
                 try {
-                    client.post("http://192.168.0.5:8000/api/method/erpnext_mobile_addons.test",params,new JsonHttpResponseHandler(){
+                    client.post("http://192.168.0.5:8000/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
 
                         @Override
                         public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
                             try {
                                 String login_check = response.getString("message");
-                                Toast.makeText(getApplicationContext(),"In Success", Toast.LENGTH_SHORT).show();
-                            }catch (JSONException e) {
+                                Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
+                            } catch (JSONException e) {
                                 e.printStackTrace();
-                                Toast.makeText(getApplicationContext(),"Exception", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getApplicationContext(), "Exception", Toast.LENGTH_SHORT).show();
 
                             }
 
@@ -72,11 +71,11 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
 
                         public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
 
-                            Toast.makeText(getApplicationContext(),"error: ", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "error: ", Toast.LENGTH_SHORT).show();
                         }
                     });
-                }catch (Exception e){
-                    Toast.makeText(getApplicationContext(),"Exception: ", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "Exception: ", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -91,7 +90,7 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
 //
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
-            HashMap<String,Date> incomingCalls = getCallDetails();
+            HashMap<String, Date> incomingCalls = getCallDetails();
             /*StringTokenizer str = new StringTokenizer(incomingCalls.toString());
             String[] incomingCallsArray = incomingCalls.toString().split(",");
             int incomingCallCount = incomingCallsArray.length;*/
@@ -126,28 +125,18 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
         }
         Toast.makeText(getApplicationContext(), "In onRequestPermissionsResult: " + String.valueOf(statusCode), Toast.LENGTH_SHORT).show();
     }
+
     private HashMap<String, Date> getCallDetails() {
-        StringBuffer sbIncoming = new StringBuffer();
-        StringBuffer sbMissed = new StringBuffer();
-        StringBuffer sbIncomingAndMissedCalls = new StringBuffer();
         Cursor managedCursor = managedQuery(CallLog.Calls.CONTENT_URI, null, null, null, null);
         int number = managedCursor.getColumnIndex(CallLog.Calls.NUMBER);
         int type = managedCursor.getColumnIndex(CallLog.Calls.TYPE);
         int date = managedCursor.getColumnIndex(CallLog.Calls.DATE);
-        int duration = managedCursor.getColumnIndex(CallLog.Calls.DURATION);
-        //sbIncoming.append("Incoming Call Log :");
-        //sbMissed.append("Missed Call Log :");
-        int incomingCallCount = 0;
-        int missedCallCount = 0;
-        HashMap<String,Date> hmIncomingCalls = new HashMap<String,Date>();
-        String prefix = "";
+        HashMap<String, Date> hmIncomingCalls = new HashMap<String, Date>();
         while (managedCursor.moveToNext()) {
             String phNumber = managedCursor.getString(number);
             String callType = managedCursor.getString(type);
             String callDate = managedCursor.getString(date);
             Date callDayTime = new Date(Long.valueOf(callDate));
-
-            String callDuration = managedCursor.getString(duration);
             String dir = null;
             int dircode = Integer.parseInt(callType);
             switch (dircode) {
@@ -161,22 +150,10 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
                     dir = "MISSED";
                     break;
             }
-            //callDayTime = (Date) android.text.format.DateFormat.format("yyyy-MM-dd hh:mm:ss a", new Date(callDate));
-            if (dir == "INCOMING") {
-                incomingCallCount++;
-                sbIncoming.append("\nPhone Number: " + phNumber + "\nCall Date:--- " + callDayTime);
-            } else if (dir == "MISSED") {
-                missedCallCount++;
-                sbMissed.append("\nPhone Number: " + phNumber + "\nCall Date:--- " + callDayTime);
+            if (dir == "INCOMING" || dir == "MISSED") {
+                hmIncomingCalls.put(phNumber, callDayTime);
             }
-            sbIncomingAndMissedCalls.append(prefix);
-            prefix = ",";
-            hmIncomingCalls.put(phNumber,callDayTime);
-            sbIncomingAndMissedCalls.append(phNumber);
         }
-        //managedCursor.close();
-//        textViewIncoming.setText(sbIncoming);
-//        textViewMissed.setText(sbMissed);
         return hmIncomingCalls;
     }
 }
