@@ -28,11 +28,12 @@ import com.loopj.android.http.RequestParams;
 import com.vavcoders.vamc.commonrest.Make;
 
 
+import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
 import static com.vavcoders.vamc.erpnextmobileaddons.GlobalVariables.menu;
 
 public class ExportCallLogToLeadListActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
-
+    GlobalVariables gv = new GlobalVariables(getApplicationContext());
     public void exportCallLog(HashMap<String, Date> incomingCalls){
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
@@ -40,7 +41,8 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
         params.put("calls", obj);
         params.put("user", "Administrator");
         try {
-            client.post("http://52.14.181.220/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
+
+            client.post("http://"+gv.URL+"/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
 
                 @Override
                 public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {

@@ -18,4 +18,13 @@
         android:horizontalSpacing="2dp"
 
         />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/home_message"
+        android:textColor="#fff"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:text="This"
+        android:textAlignment="center"/>
 </android.support.constraint.ConstraintLayout>
