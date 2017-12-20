@@ -10,11 +10,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.vavcoders.vamc.helper.DatabaseHelper;
+import com.vavcoders.vamc.model.Auth;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,6 +28,7 @@ import java.util.HashMap;
 public class SplashActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
 
+    DatabaseHelper db;
     /**
      * Duration of wait
      **/
@@ -58,26 +62,39 @@ public class SplashActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String[]{Manifest.permission.READ_CALL_LOG}, PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
-            String deviceId = getDeviceId();
-            HashMap<String, String> user = new HashMap<String, String>();
-            user.put("username", "Sample Username");
-            user.put("imei", deviceId);
-            user.put("mobile", "");
-            try {
-                logUser(user);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } finally {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // Create an Intent that will start the Menu-Activity.
-                        Intent mainIntent = new Intent(SplashActivity.this, HomeActivity.class);
-                        SplashActivity.this.startActivity(mainIntent);
-                        SplashActivity.this.finish();
-                    }
-                }, SPLASH_DISPLAY_LENGTH);
+
+            db = new DatabaseHelper(getApplicationContext());
+            Auth loginProfile = db.getLoginProfile();
+            if(loginProfile.getUname() == null){
+
+                Intent mainIntent = new Intent(SplashActivity.this, PreLoginActivity.class);
+                SplashActivity.this.startActivity(mainIntent);
+                SplashActivity.this.finish();
+            }else{
+                String uname = loginProfile.getUname();
+                String deviceId = getDeviceId();
+                HashMap<String, String> user = new HashMap<String, String>();
+                user.put("username", uname);
+                user.put("imei", deviceId);
+                user.put("mobile", "");
+                try {
+                    logUser(user);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } finally {
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            // Create an Intent that will start the Menu-Activity.
+                            Intent mainIntent = new Intent(SplashActivity.this, HomeActivity.class);
+                            SplashActivity.this.startActivity(mainIntent);
+                            SplashActivity.this.finish();
+                        }
+                    }, SPLASH_DISPLAY_LENGTH);
+                }
             }
+
+
         }
     }
 

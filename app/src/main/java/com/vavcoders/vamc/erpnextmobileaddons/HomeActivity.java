@@ -16,6 +16,7 @@ import android.telephony.TelephonyManager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -32,17 +33,13 @@ public class HomeActivity extends AppCompatActivity {
     GridView gridView;
     GridViewCustomAdapter grisViewCustomeAdapter;
 
-
-
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        gridView=(GridView)findViewById(R.id.gridViewCustom);
+        TextView tv_home_message = (TextView)findViewById(R.id.home_message);
+        tv_home_message.setText("All the incoming calls will be converted into leads.(excluding the leads which are already created)");
+        /*gridView=(GridView)findViewById(R.id.gridViewCustom);
         // Create the Custom Adapter Object
         grisViewCustomeAdapter = new GridViewCustomAdapter(this);
         // Set the Adapter to GridView
@@ -68,7 +65,7 @@ public class HomeActivity extends AppCompatActivity {
                 HomeActivity.this.finish();
 
             }
-        });
+        });*/
     }
 
 

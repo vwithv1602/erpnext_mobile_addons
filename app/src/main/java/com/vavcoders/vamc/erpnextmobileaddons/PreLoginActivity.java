@@ -3,6 +3,7 @@ package com.vavcoders.vamc.erpnextmobileaddons;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,13 +11,15 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.vavcoders.vamc.helper.DatabaseHelper;
+import com.vavcoders.vamc.model.Auth;
 
 
 import org.json.JSONException;
 
 
 public class PreLoginActivity extends AppCompatActivity {
-
+DatabaseHelper db;
     private static final String TAG = "com.vavcoders.vamc.erpnextmobileaddons";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +30,8 @@ public class PreLoginActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                EditText et_url = (EditText) findViewById(R.id.et_url);
-                EditText et_email = (EditText) findViewById(R.id.et_email);
+                final EditText et_url = (EditText) findViewById(R.id.et_url);
+                final EditText et_email = (EditText) findViewById(R.id.et_email);
                 EditText et_password = (EditText) findViewById(R.id.et_password);
 
                 String generatedURL = "http://"+et_url.getText()+"/api/method/login";
@@ -44,7 +47,18 @@ public class PreLoginActivity extends AppCompatActivity {
                             try {
                                 String login_check = response.getString("message");
                                 if(login_check.equalsIgnoreCase("logged in") && response.has("full_name")){
-                                    Intent mainIntent = new Intent(PreLoginActivity.this,HomeActivity.class);
+                                    /* >> Push login details into sqlite */
+                                    db = new DatabaseHelper(getApplicationContext());
+                                    Auth loginObj = new Auth();
+                                    loginObj.setUname(String.valueOf(et_email.getText()));
+                                    loginObj.setUrl(String.valueOf(et_url.getText()));
+                                    loginObj.setFullname(response.getString("full_name"));
+                                    loginObj.setIs_logged_in(true);
+
+                                    db.storeLoginDetails(loginObj);
+                                    /* << Push login details into sqlite */
+
+                                    Intent mainIntent = new Intent(PreLoginActivity.this,SplashActivity.class);
                                     PreLoginActivity.this.startActivity(mainIntent);
                                     PreLoginActivity.this.finish();
                                 }else{
@@ -60,7 +74,6 @@ public class PreLoginActivity extends AppCompatActivity {
                         }
 
                         public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-
                             Toast.makeText(getApplicationContext(),"error: ", Toast.LENGTH_SHORT).show();
                         }
                     });
