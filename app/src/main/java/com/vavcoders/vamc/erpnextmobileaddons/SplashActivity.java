@@ -119,12 +119,13 @@ public class SplashActivity extends AppCompatActivity {
     private void logUser(HashMap<String, String> user) throws JSONException {
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
+        GlobalVariables gv = new GlobalVariables(getApplicationContext());
         JSONObject obj = new JSONObject(user);
         params.put("username", obj.get("username"));
         params.put("imei", obj.get("imei"));
         params.put("mobile", obj.get("mobile"));
         try {
-            client.post("http://192.168.0.5:8000/api/method/erpnext_mobile_addons.log_user", params, new JsonHttpResponseHandler() {
+            client.post("http://"+gv.URL+"/api/method/erpnext_mobile_addons.log_user", params, new JsonHttpResponseHandler() {
 
                 @Override
                 public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
