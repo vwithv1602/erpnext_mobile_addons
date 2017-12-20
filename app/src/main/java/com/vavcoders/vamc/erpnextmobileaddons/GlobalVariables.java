@@ -18,11 +18,13 @@ public class GlobalVariables extends DatabaseHelper{
     };
 
     public String URL;
+    public String LOGGED_IN_USER;
 
     public GlobalVariables(Context context) {
         super(context);
         DatabaseHelper db = new DatabaseHelper(context);
         Auth loginProfile = db.getLoginProfile();
         URL = loginProfile.getUrl();
+        LOGGED_IN_USER = loginProfile.getUname();
     }
 }

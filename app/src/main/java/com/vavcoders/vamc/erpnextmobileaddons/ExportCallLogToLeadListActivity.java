@@ -39,7 +39,7 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
         RequestParams params = new RequestParams();
         JSONObject obj = new JSONObject(incomingCalls);
         params.put("calls", obj);
-        params.put("user", "Administrator");
+        params.put("user", gv.LOGGED_IN_USER);
         try {
 
             client.post("http://"+gv.URL+"/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
