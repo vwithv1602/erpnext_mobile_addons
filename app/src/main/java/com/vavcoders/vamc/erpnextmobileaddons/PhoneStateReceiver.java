@@ -19,6 +19,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        GlobalVariables gv = new GlobalVariables(context);
         try {
             System.out.println("Receiver start");
             String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
@@ -26,8 +27,7 @@ public class PhoneStateReceiver extends BroadcastReceiver {
             if(state.equals(TelephonyManager.EXTRA_STATE_RINGING)){
                 HashMap<String, Date> hmIncomingCalls = new HashMap<String, Date>();
                 hmIncomingCalls.put(incomingNumber, new Date());
-                ExportCallLogToLeadListActivity expCallLogObj = new ExportCallLogToLeadListActivity();
-                expCallLogObj.exportCallLog(hmIncomingCalls);
+                gv.exportCallLog(hmIncomingCalls);
                 Toast.makeText(context," Incoming call: "+incomingNumber,Toast.LENGTH_LONG).show();
             }
             if(state.equals(TelephonyManager.EXTRA_STATE_OFFHOOK)){

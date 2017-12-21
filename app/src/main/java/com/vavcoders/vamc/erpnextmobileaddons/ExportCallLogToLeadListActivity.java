@@ -34,38 +34,7 @@ import static com.vavcoders.vamc.erpnextmobileaddons.GlobalVariables.menu;
 public class ExportCallLogToLeadListActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     GlobalVariables gv = new GlobalVariables(getApplicationContext());
-    public void exportCallLog(HashMap<String, Date> incomingCalls){
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        JSONObject obj = new JSONObject(incomingCalls);
-        params.put("calls", obj);
-        params.put("user", gv.LOGGED_IN_USER);
-        try {
 
-            client.post("http://"+gv.URL+"/api/method/erpnext_mobile_addons.exportCallLog", params, new JsonHttpResponseHandler() {
-
-                @Override
-                public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
-                    try {
-                        String login_check = response.getString("message");
-//                        Toast.makeText(getApplicationContext(), "Success", Toast.LENGTH_SHORT).show();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-//                        Toast.makeText(getApplicationContext(), "Exception", Toast.LENGTH_SHORT).show();
-
-                    }
-
-                }
-
-                public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-
-//                    Toast.makeText(getApplicationContext(), "error: ", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (Exception e) {
-//            Toast.makeText(getApplicationContext(), "Exception: ", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +52,7 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
                 // call getLog function to get all incoming & missed call numbers
                 HashMap<String, Date> sb_incomingCalls = getCallDetails();
                 // post to api to save in lead list
-                exportCallLog(sb_incomingCalls);
+                gv.exportCallLog(sb_incomingCalls);
 
             }
         });
