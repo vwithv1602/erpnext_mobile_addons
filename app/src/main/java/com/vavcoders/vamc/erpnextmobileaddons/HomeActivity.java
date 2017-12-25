@@ -38,7 +38,7 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         TextView tv_home_message = (TextView)findViewById(R.id.home_message);
-        tv_home_message.setText("All the incoming calls will be converted into leads.(excluding the leads which are already created)");
+        tv_home_message.setText("All the incoming calls will be converted into leads. Leads get updated if customer already exists.\n\n YOU NEED TO UNINSTALL THIS APP IF YOU DON'T WANT TO CONVERT YOUR INCOMING CALLS ON THIS DEVICE INTO LEADS. \n\n version: 1.1");
         /*gridView=(GridView)findViewById(R.id.gridViewCustom);
         // Create the Custom Adapter Object
         grisViewCustomeAdapter = new GridViewCustomAdapter(this);

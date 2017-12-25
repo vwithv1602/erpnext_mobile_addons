@@ -129,7 +129,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 @Override
                 public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
-                    Toast.makeText(getApplicationContext(), "Success from log_user", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Authenticated", Toast.LENGTH_LONG).show();
                 }
 
                 public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {

@@ -25,6 +25,6 @@
         android:textColor="#fff"
         android:textStyle="bold"
         android:padding="20dp"
-        android:text="This"
+        android:text=""
         android:textAlignment="center"/>
 </android.support.constraint.ConstraintLayout>
