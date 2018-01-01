@@ -30,7 +30,6 @@
         android:layout_marginRight="20dp"
         android:layout_height="0dp"
         android:hint="URL"
-        android:enabled="false"
         android:text="52.14.181.220"
         android:imeOptions="actionNext"
         android:inputType="text"
