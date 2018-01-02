@@ -58,6 +58,10 @@ public class MainActivity extends AppCompatActivity
         }
         name.setText(username);
         email.setText(useremail);
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.content_frame, new LeadSyncFragment(),"tag_lead_sync_fragment")
+                .commit();
     }
 
     @Override
