@@ -1,30 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#3498db"
-    tools:context="com.vavcoders.vamc.erpnextmobileaddons.HomeActivity">
-    <GridView
-        android:id="@+id/gridViewCustom"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_margin="5dp"
-        android:columnWidth="90dp"
-        android:gravity="left"
-        android:numColumns="1"
-        android:stretchMode="columnWidth"
-        android:horizontalSpacing="2dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="@dimen/appbar_padding_top">
 
-        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/home_message"
-        android:textColor="#fff"
         android:textStyle="bold"
         android:padding="20dp"
-        android:text=""
+        android:text="All the incoming calls will be converted into leads. Leads get updated if customer already exists."
         android:textAlignment="center"/>
-</android.support.constraint.ConstraintLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_sync_toggle"
+        android:text="Stop Sync"
+        android:padding="@dimen/appbtn_padding"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/textColorPrimary"/>
+</LinearLayout>
