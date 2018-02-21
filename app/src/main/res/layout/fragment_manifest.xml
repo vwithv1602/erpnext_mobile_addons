@@ -15,7 +15,6 @@ android:padding="@dimen/appbar_padding_top">
     android:layout_marginTop="@dimen/activity_vertical_margin"
     android:text="Save manifest in just a few clicks. Manifests will be saved in your google drive (configured in ERP) and linked with the specified Delivery Note in ERP"
     />
-
     <TextView
         android:id="@+id/tv_form_manifest_dn_label"
         android:layout_width="wrap_content"

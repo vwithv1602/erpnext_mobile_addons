@@ -1,7 +1,7 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.content.Context;
-import android.util.Log;
+// import android.util.Log;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -67,7 +67,7 @@ public class GlobalVariables extends DatabaseHelper{
                 }
             });
         } catch (Exception e) {
-            Log.e("Exception","E-GV-eCL-postapi");
+            // Log.e("Exception","E-GV-eCL-postapi");
         }
     }
 }

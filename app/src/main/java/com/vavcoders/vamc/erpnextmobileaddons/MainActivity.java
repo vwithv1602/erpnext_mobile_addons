@@ -110,10 +110,10 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new LeadSyncFragment(),"tag_lead_sync_fragment")
                     .commit();
-        }else if (id == R.id.nav_manifest_upload) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.content_frame, new ManifestFragment(),"tag_manifest_fragment")
-                    .commit();
+//        }else if (id == R.id.nav_manifest_upload) {
+//            fragmentManager.beginTransaction()
+//                    .replace(R.id.content_frame, new ManifestFragment(),"tag_manifest_fragment")
+//                    .commit();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

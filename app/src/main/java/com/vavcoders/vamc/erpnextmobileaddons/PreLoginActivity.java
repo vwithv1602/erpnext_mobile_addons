@@ -3,7 +3,7 @@ package com.vavcoders.vamc.erpnextmobileaddons;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
+// import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,7 +58,7 @@ DatabaseHelper db;
                                     db.storeLoginDetails(loginObj);
                                     /* << Push login details into sqlite */
 
-                                    Intent mainIntent = new Intent(PreLoginActivity.this,SplashActivity.class);
+                                    Intent mainIntent = new Intent(PreLoginActivity.this,MainActivity.class);
                                     PreLoginActivity.this.startActivity(mainIntent);
                                     PreLoginActivity.this.finish();
                                 }else{

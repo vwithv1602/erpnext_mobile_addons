@@ -10,7 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
-import android.util.Log;
+// import android.util.Log;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -68,6 +68,7 @@ public class SplashActivity extends AppCompatActivity {
 
             db = new DatabaseHelper(getApplicationContext());
             Auth loginProfile = db.getLoginProfile();
+            Toast.makeText(getApplicationContext(),"Uname: "+loginProfile.getUname(), Toast.LENGTH_LONG).show();
             if(loginProfile.getUname() == null){
 
                 Intent mainIntent = new Intent(SplashActivity.this, PreLoginActivity.class);
