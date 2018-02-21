@@ -113,7 +113,7 @@ public class ManifestActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_manifest, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            TextView textView = (TextView) rootView.findViewById(R.id.tv_manifest_intro_label);
             textView.setText("You are viewing tab: "+getArguments().getInt(ARG_SECTION_NUMBER));
             return rootView;
         }

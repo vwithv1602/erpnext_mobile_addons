@@ -1,22 +1,94 @@
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="com.vavcoders.vamc.erpnextmobileaddons.ManifestActivity$PlaceholderFragment">
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical"
+android:layout_width="fill_parent"
+android:layout_height="fill_parent"
+android:padding="@dimen/appbar_padding_top">
 
+<TextView
+    android:id="@+id/tv_manifest_intro_label"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="@dimen/activity_vertical_margin"
+    android:layout_marginEnd="@dimen/activity_horizontal_margin"
+    android:layout_marginStart="@dimen/activity_horizontal_margin"
+    android:layout_marginTop="@dimen/activity_vertical_margin"
+    android:text="Save manifest in just a few clicks. Manifests will be saved in your google drive (configured in ERP) and linked with the specified Delivery Note in ERP"
+    />
     <TextView
-        android:id="@+id/section_label"
+        android:id="@+id/tv_form_manifest_dn_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/constraintLayout"
-        tools:layout_constraintLeft_creator="1"
-        tools:layout_constraintTop_creator="1" />
+        android:text="Enter Delivery Note ID:"
+        android:textStyle="bold"
+        android:layout_marginLeft="20dp"
+        />
+    <EditText
+        android:id="@+id/et_manifest_dn"
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_height="60dp"
+        android:hint="for eg., DN-00001"
+        android:text=""
+        android:inputType="textCapCharacters"
+        android:singleLine="true">
+    </EditText>
+<Button
+    android:id="@+id/btn_capture_manifest"
+    android:layout_width="wrap_content"
+    android:layout_gravity="center"
+    android:layout_height="wrap_content"
+    android:text="Capture Manifest"
+    android:layout_marginBottom="10dp"
+    android:padding="@dimen/appbtn_padding"
+    android:background="@color/colorPrimary"
+    android:textColor="@color/textColorPrimary"
+    android:enabled="false"/>
 
-</android.support.constraint.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp">
+        <ImageView
+            android:id="@+id/iv_manifest_preview"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:visibility="visible" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/LinearLayout02"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_alignParentBottom="true">
+        <Button
+            android:id="@+id/btn_confirm_manifest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Confirm"
+            android:padding="@dimen/appbtn_padding"
+            android:layout_margin="2dp"
+            android:background="@color/colorPrimary"
+            android:textColor="@color/textColorPrimary"
+            android:visibility="gone"
+            >
+        </Button>
+        <Button
+            android:id="@+id/btn_try_manifest"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Try Again"
+            android:padding="@dimen/appbtn_padding"
+            android:layout_margin="2dp"
+            android:background="@color/colorAccent"
+            android:textColor="@color/textColorPrimary"
+            android:visibility="gone">
+        </Button>
+    </LinearLayout>
+
+</LinearLayout>
