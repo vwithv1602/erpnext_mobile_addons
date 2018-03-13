@@ -24,7 +24,6 @@ public class PhoneStateReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         GlobalVariables gv = new GlobalVariables(context);
         try {
-            System.out.println("Receiver start");
             String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
             String incomingNumber = intent.getStringExtra(TelephonyManager.EXTRA_INCOMING_NUMBER);
             if(state.equals(TelephonyManager.EXTRA_STATE_RINGING)){
