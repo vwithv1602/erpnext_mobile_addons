@@ -88,6 +88,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     }
 
+    public void removeLoginDetails(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_LOGIN, "", new String[] {});
+    }
     public Settings getAllSettings(){
         String selectQuery = "SELECT config,config_value FROM " + TABLE_SETTINGS;
         SQLiteDatabase db = this.getReadableDatabase();
