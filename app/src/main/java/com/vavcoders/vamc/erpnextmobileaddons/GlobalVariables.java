@@ -97,7 +97,7 @@ public class GlobalVariables extends DatabaseHelper{
             }
 
         }
-        
+
         this.deleteLeadsQueue();
 
 
