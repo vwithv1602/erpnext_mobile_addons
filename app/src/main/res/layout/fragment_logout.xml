@@ -1,0 +1,25 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.vavcoders.vamc.erpnextmobileaddons.LogoutFragment">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/logout_message"
+        android:textStyle="bold"
+        android:padding="60dp"
+        android:text="Are you sure you want to logout?"
+        android:textAlignment="center"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_logout_confirm"
+        android:text="Logout"
+        android:padding="@dimen/appbtn_padding"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/textColorPrimary"/>
+</FrameLayout>

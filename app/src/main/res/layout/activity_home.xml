@@ -1,30 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#3498db"
-    tools:context="com.vavcoders.vamc.erpnextmobileaddons.HomeActivity">
-    <GridView
-        android:id="@+id/gridViewCustom"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_margin="5dp"
-        android:columnWidth="90dp"
-        android:gravity="left"
-        android:numColumns="1"
-        android:stretchMode="columnWidth"
-        android:horizontalSpacing="2dp"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="@dimen/appbar_padding_top">
 
-        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/home_message"
-        android:textColor="#fff"
         android:textStyle="bold"
         android:padding="20dp"
-        android:text=""
+        android:text="All the incoming calls will be converted into leads. Leads get updated if customer already exists."
         android:textAlignment="center"/>
-</android.support.constraint.ConstraintLayout>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_sync_toggle"
+        android:text="Stop Sync"
+        android:padding="@dimen/appbtn_padding"
+        android:background="@color/colorPrimary"
+        android:textColor="@color/textColorPrimary"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="20dp"
+        android:background="#c0c0c0"/>
+    <View
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="0dp"
+        android:background="#c0c0c0"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/force_sync_message"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:text="This section will be temporarily available which is used for force creation of leads from the selected datetime (This may have duplicate leads but solve manual creation of leads whenever WiFi is down.)"
+        android:textAlignment="center"/>
+    <EditText
+        android:id="@+id/et_force_datetime"
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_height="60dp"
+        android:hint="Datetime (YYYY-MM-DD hh:mm:ss)"
+        android:text=""
+        android:imeOptions="actionNext"
+        android:inputType="text"
+        android:padding="10dp"
+        android:textColor="#666"
+        android:textColorHint="#aaa"
+        android:singleLine="true" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:id="@+id/btnForceSync"
+            android:text="Force Sync"
+            android:layout_marginTop="0dp"
+            android:textColor="#fff"
+            android:textColorHint="#fff"
+            android:background="#2980b9"
+            android:padding="@dimen/appbtn_padding"
+
+            />
+    </RelativeLayout>
+
+</LinearLayout>
