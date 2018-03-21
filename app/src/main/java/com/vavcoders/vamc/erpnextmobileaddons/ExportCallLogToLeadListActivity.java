@@ -61,9 +61,6 @@ public class ExportCallLogToLeadListActivity extends AppCompatActivity {
             //After this point you wait for callback in onRequestPermissionsResult(int, String[], int[]) overriden method
             tv_exportText.setText("Allow us to read your contacts to export.");
             btn_exportBtn.setVisibility(View.INVISIBLE);
-
-
-//
         } else {
             // Android version is lesser than 6.0 or the permission is already granted.
             HashMap<String, Date> incomingCalls = getCallDetails();
