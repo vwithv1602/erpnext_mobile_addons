@@ -3,6 +3,7 @@ package com.vavcoders.vamc.erpnextmobileaddons;
 import android.content.ContentValues;
 import android.content.Context;
 // import android.util.Log;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,8 +41,10 @@ public class GlobalVariables extends DatabaseHelper{
 
     public String URL;
     public String LOGGED_IN_USER;
+    public Context context;
     public GlobalVariables(Context context) {
         super(context);
+        this.context = context;
         DatabaseHelper db = new DatabaseHelper(context);
         Auth loginProfile = db.getLoginProfile();
         URL = loginProfile.getUrl();
@@ -89,11 +92,9 @@ public class GlobalVariables extends DatabaseHelper{
                         }
                     }
                     public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-//                        Log.d("python","onFailure");
                     }
                 });
             } catch (Exception e) {
-//                Log.d("python","In Exception");
             }
 
         }
@@ -110,6 +111,34 @@ public class GlobalVariables extends DatabaseHelper{
         /* << Store in LeadsQueue*/
         this.processQueueIfInternetAvailable();
 
+    }
+
+    public void saveSettings(String selected_google_account){
+        String generatedURL = "http://"+this.URL+"/api/method/erpnext_mobile_addons.save_settings";
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("username",this.LOGGED_IN_USER);
+        params.put("selected_google_account",selected_google_account);
+        try {
+            client.post(generatedURL,params,new JsonHttpResponseHandler(){
+
+                @Override
+                public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                    try {
+                        String save_result = response.getString("message");
+                        Toast.makeText(context,save_result, Toast.LENGTH_LONG).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(context,"Exception in parsing result", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+                    Toast.makeText(context,"Failure: ", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }catch (Exception e){
+            Toast.makeText(context,"Exception occurred in requesting API", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
