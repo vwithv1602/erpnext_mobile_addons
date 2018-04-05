@@ -106,6 +106,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                 if (!hasFocus){
                     // get SI for selected customer (actv_manifest_customer)
                     Log.d(TAG,"get SI for: "+actv_manifest_customer.getText());
+                    
                 }
             }
         });
