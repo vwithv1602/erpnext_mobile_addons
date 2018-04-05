@@ -1,6 +1,7 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.app.FragmentManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -101,7 +102,7 @@ public class MainActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+        public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
         FragmentManager fragmentManager = getFragmentManager();
@@ -110,10 +111,16 @@ public class MainActivity extends AppCompatActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new LeadSyncFragment(),"tag_lead_sync_fragment")
                     .commit();
-//        }else if (id == R.id.nav_manifest_upload) {
+        }else if (id == R.id.test) {
+            Intent newAct = new Intent(this, DeliveryActivity.class);
+            startActivity(newAct);
 //            fragmentManager.beginTransaction()
 //                    .replace(R.id.content_frame, new ManifestFragment(),"tag_manifest_fragment")
 //                    .commit();
+        }else if (id == R.id.nav_manifest_upload) {
+            fragmentManager.beginTransaction()
+                    .replace(R.id.content_frame, new ManifestFragment(),"tag_manifest_fragment")
+                    .commit();
         }else if (id == R.id.nav_settings) {
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new SettingsFragment(),"tag_settings_fragment")

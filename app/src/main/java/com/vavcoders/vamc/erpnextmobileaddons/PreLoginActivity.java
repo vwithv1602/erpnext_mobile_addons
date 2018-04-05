@@ -1,6 +1,7 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.content.Intent;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 // import android.util.Log;
@@ -18,7 +19,7 @@ import com.vavcoders.vamc.model.Auth;
 import org.json.JSONException;
 
 
-public class PreLoginActivity extends AppCompatActivity {
+public class PreLoginActivity extends FragmentActivity {
 DatabaseHelper db;
     private static final String TAG = "com.vavcoders.vamc.erpnextmobileaddons";
     @Override

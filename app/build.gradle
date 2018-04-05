@@ -6,8 +6,8 @@ android {
         applicationId "com.vavcoders.vamc.erpnextmobileaddons"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 5
-        versionName "3.0"
+        versionCode 6
+        versionName "4.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -36,6 +36,7 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation files('libs/android-async-http-1.4.9.jar')
     implementation files('libs/CommonREST.jar')
-    compile 'com.squareup.okhttp3:okhttp:3.3.1'
-    compile 'com.nbsp:library:1.09'
+    implementation 'com.squareup.okhttp3:okhttp:3.3.1'
+    implementation 'com.nbsp:library:1.09'
+    implementation 'com.google.android.gms:play-services:8.4.0'
 }
