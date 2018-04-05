@@ -87,6 +87,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         et_manifest_dn = (EditText) findViewById(R.id.et_manifest_dn);
+        et_manifest_dn.setSelection(et_manifest_dn.getText().length());
         tv_manifest_intro_label = (TextView) findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
         iv_manifest_preview = (ImageView) findViewById(R.id.iv_manifest_preview);
