@@ -33,7 +33,7 @@
         android:layout_marginBottom="20dp"
         android:layout_height="60dp"
         android:hint="for eg., DN-00001"
-        android:text="DN-01583"
+        android:text="DN-"
         android:inputType="textCapCharacters"
         android:singleLine="true">
     </EditText>

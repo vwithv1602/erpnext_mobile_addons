@@ -122,19 +122,23 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                                         Toast.makeText(getApplicationContext(),"DN is cancelled/closed.", Toast.LENGTH_LONG).show();
                                     }else if(response.getString("message").equalsIgnoreCase("Draft")){
                                         captureImage();
+                                    }else if(response.getString("message").equalsIgnoreCase("404")){
+                                        Toast.makeText(getApplicationContext(),"DN not found.", Toast.LENGTH_LONG).show();
+                                    }else{
+                                        Toast.makeText(getApplicationContext(),"Some error occurred in DN check. Please contact admin.", Toast.LENGTH_LONG).show();
                                     }
                                 } catch (JSONException e) {
-//                                    Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
+//                                    Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api response");
                                     e.printStackTrace();
                                 }
                             }
 
                             public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-                                Toast.makeText(getApplicationContext(),"check_dn_for_manifest error: ", Toast.LENGTH_SHORT).show();
+//                                Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
                             }
                         });
                     }catch (Exception e){
-                        Toast.makeText(getApplicationContext(),"check_dn_for_manifest Exception: ", Toast.LENGTH_SHORT).show();
+//                        Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
                     }
                 }
 
@@ -352,66 +356,6 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 //        Log.d(TAG, "GoogleApiClient connection suspended");
     }
 
-    public void onClickCreateMethod(View view) {
-        // create new contents resource
-        Drive.DriveApi.newDriveContents(mGoogleApiClient)
-                .setResultCallback(driveContentsCallback);
-    }
-
-
-    /**
-     * This is Result result handler of Drive contents.
-     * this callback method call CreateFileOnGoogleDrive() method
-     * and also call OpenFileFromGoogleDrive() method,
-     * send intent onActivityResult() method to handle result.
-     */
-    final ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
-            new ResultCallback<DriveApi.DriveContentsResult>() {
-                @Override
-                public void onResult(DriveApi.DriveContentsResult result) {
-
-                    if (result.getStatus().isSuccess()) {
-//                            CreateFileOnGoogleDrive(result);
-                    }
-
-                }
-            };
-    /**
-     * Create a file in root folder using MetadataChangeSet object.
-     * @param result
-     */
-    public void CreateFileOnGoogleDrive(DriveApi.DriveContentsResult result){
-
-        final DriveContents driveContents = result.getDriveContents();
-
-        // Perform I/O off the UI thread.
-        new Thread() {
-            @Override
-            public void run() {
-                // write content to DriveContents
-                OutputStream outputStream = driveContents.getOutputStream();
-                Writer writer = new OutputStreamWriter(outputStream);
-
-                try {
-                    writer.write("Hello VamC!");
-                    writer.close();
-                } catch (IOException e) {
-//                    Log.d(TAG, e.getMessage());
-                }
-
-                MetadataChangeSet changeSet = new MetadataChangeSet.Builder()
-                        .setTitle("VamCDriveTest")
-                        .setMimeType("text/plain")
-                        .setStarred(true).build();
-
-                // create a file in root folder
-                Drive.DriveApi.getRootFolder(mGoogleApiClient)
-                        .createFile(mGoogleApiClient, changeSet, driveContents)
-                        .setResultCallback(fileCallback);
-            }
-        }.start();
-    }
-
     /**
      * Handle result of Created file
      */
@@ -439,17 +383,17 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 
                             }
                         } catch (JSONException e) {
-                            Log.d("VamCLog","In Exception");
+//                            Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api response");
                             e.printStackTrace();
                         }
                     }
 
                     public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
-                        Toast.makeText(getApplicationContext(),"check_dn_for_manifest error: ", Toast.LENGTH_SHORT).show();
+//                        Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
                     }
                 });
             }catch (Exception e){
-                Toast.makeText(getApplicationContext(),"check_dn_for_manifest Exception: ", Toast.LENGTH_SHORT).show();
+//                Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
             }
         }
     };
@@ -459,8 +403,8 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                 public void onResult(DriveFolder.DriveFileResult result) {
                     if (result.getStatus().isSuccess()) {
                         result.getDriveFile().getDriveId().getResourceId();
-                        Toast.makeText(getApplicationContext(), "file created: "+""+
-                                result.getDriveFile().getDriveId(), Toast.LENGTH_LONG).show();
+//                        Log.d(TAG,"file created: "+""+result.getDriveFile().getDriveId());
+                        Toast.makeText(getApplicationContext(), "Uploaded to Google Drive", Toast.LENGTH_LONG).show();
 
                         DriveId File_Uncompleted_Id = result.getDriveFile().getDriveId();
                         DriveFile file = Drive.DriveApi.getFile(mGoogleApiClient, File_Uncompleted_Id);
