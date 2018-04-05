@@ -17,12 +17,15 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -44,10 +47,12 @@ import com.google.android.gms.drive.query.SearchableField;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.SyncHttpClient;
 import com.vavcoders.vamc.helper.DatabaseHelper;
 import com.vavcoders.vamc.model.Auth;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,6 +61,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
+import cz.msebera.android.httpclient.Header;
 
 public class DeliveryActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,GoogleApiClient.OnConnectionFailedListener {
 
@@ -66,6 +73,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private GoogleApiClient mGoogleApiClient;
 
     private static EditText et_manifest_dn;
+    private static AutoCompleteTextView actv_manifest_customer;
     private Button btn_capture_manifest,btn_confirm_manifest,btn_try_manifest;
     private Uri fileUri;
     public static final int MEDIA_TYPE_IMAGE = 1;
@@ -76,6 +84,9 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private ImageView iv_manifest_preview;
     public byte[] imageData;
     DatabaseHelper db;
+    GlobalVariables gv;
+
+    public String[] customers = {};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,13 +99,23 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 
         et_manifest_dn = (EditText) findViewById(R.id.et_manifest_dn);
         et_manifest_dn.setSelection(et_manifest_dn.getText().length());
+        actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
+        actv_manifest_customer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (!hasFocus){
+                    // get SI for selected customer (actv_manifest_customer)
+                    Log.d(TAG,"get SI for: "+actv_manifest_customer.getText());
+                }
+            }
+        });
         tv_manifest_intro_label = (TextView) findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
         iv_manifest_preview = (ImageView) findViewById(R.id.iv_manifest_preview);
         btn_confirm_manifest = (Button) findViewById(R.id.btn_confirm_manifest);
         btn_try_manifest = (Button) findViewById(R.id.btn_try_manifest);
-
         btn_capture_manifest = (Button) findViewById(R.id.btn_capture_manifest);
+        getAllCustomersFromERP();
         btn_capture_manifest.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -191,6 +212,39 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
             }
         });
     }
+
+
+    public void getAllCustomersFromERP(){
+        db = new DatabaseHelper(getApplicationContext());
+        Auth loginProfile = db.getLoginProfile();
+        String customerUrl = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_all_customers";
+        AsyncHttpClient client = new AsyncHttpClient();
+        try {
+            client.get(customerUrl,new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        customers = mapper.readValue(response.getString("message").toString(), String[].class);
+                        ArrayAdapter<String> adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
+                        actv_manifest_customer.setThreshold(1);
+                        actv_manifest_customer.setAdapter(adapter);
+                    } catch (IOException e) {
+//                        Log.d(TAG,"IOException in get_all_customers call");
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+//                        Log.d(TAG,"JSONException in get_all_customers call");
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }catch (Exception e){
+//            Log.d(TAG,"Exception in get_all_customers call");
+        }
+//        Log.d(TAG,String.valueOf(customers.length));
+    }
+
     public void CreateImageOnGoogleDrive(DriveApi.DriveContentsResult result, final byte[] imageDataInput,final String manifest_file_name){
 
         final DriveContents driveContents = result.getDriveContents();

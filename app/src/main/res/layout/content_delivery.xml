@@ -17,6 +17,25 @@
         android:text="Save manifest in just a few clicks. Manifests will be saved in your google drive (configured in ERP) and linked with the specified Delivery Note in ERP"
         />
     <TextView
+        android:id="@+id/tv_form_manifest_cust_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Enter Customer name:"
+        android:textStyle="bold"
+        android:layout_marginLeft="20dp"
+        />
+    <AutoCompleteTextView
+        android:id="@+id/actv_manifest_customer"
+        android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_height="60dp"
+        android:hint="for eg., Vishesh Handa"
+        android:singleLine="true"
+        />
+    <TextView
         android:id="@+id/tv_form_manifest_dn_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

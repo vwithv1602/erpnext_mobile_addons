@@ -8,10 +8,15 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 import com.loopj.android.http.SyncHttpClient;
+import com.loopj.android.http.TextHttpResponseHandler;
 import com.vavcoders.vamc.helper.DatabaseHelper;
 import com.vavcoders.vamc.model.Auth;
 import com.vavcoders.vamc.model.LeadsQueue;
@@ -19,6 +24,7 @@ import com.vavcoders.vamc.model.LeadsQueue;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -27,18 +33,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
+
 /**
  * Created by vamc on 12/13/17.
  */
 
 public class GlobalVariables extends DatabaseHelper{
-
     /* Define menu options here*/
     public static final String[][] menu = new String[][]{
             {"ExportCallLogToLeadListActivity","Export Call log to lead list"},
             {"ManifestActivity","Manifest"}
     };
 
+    private static final String TAG = "VamCLog";
     public String URL;
     public String LOGGED_IN_USER;
     public Context context;
@@ -126,6 +134,14 @@ public class GlobalVariables extends DatabaseHelper{
                 public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
                     try {
                         String save_result = response.getString("message");
+                        ObjectMapper mapper = new ObjectMapper();
+                        try {
+                            String[] arr = mapper.readValue(save_result, String[].class);
+                            Log.d(TAG,arr[0]);
+                        } catch (IOException e) {
+                            Log.d(TAG,"json array parsing exception");
+                            e.printStackTrace();
+                        }
                         Toast.makeText(context,save_result, Toast.LENGTH_LONG).show();
                     } catch (JSONException e) {
                         e.printStackTrace();
