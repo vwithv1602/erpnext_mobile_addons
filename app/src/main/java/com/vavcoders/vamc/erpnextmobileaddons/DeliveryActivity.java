@@ -15,13 +15,18 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -72,7 +77,6 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private DriveId mFileId;
     private GoogleApiClient mGoogleApiClient;
 
-    private static EditText et_manifest_dn;
     private static AutoCompleteTextView actv_manifest_customer;
     private Button btn_capture_manifest,btn_confirm_manifest,btn_try_manifest;
     private Uri fileUri;
@@ -80,13 +84,14 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private static final int CAMERA_CAPTURE_IMAGE_REQUEST_CODE = 100;
     private static String manifest_file_name;
     private static final String IMAGE_DIRECTORY_NAME = "ERPNextMobileAddons";
-    private TextView tv_manifest_intro_label,tv_form_manifest_dn_label;
+    private TextView tv_manifest_intro_label,tv_form_manifest_dn_label,tv_form_manifest_cust_label;
     private ImageView iv_manifest_preview;
+    private Spinner spinner_manifest_dn_si;
     public byte[] imageData;
     DatabaseHelper db;
-    GlobalVariables gv;
-
+    private String sinv_id;
     public String[] customers = {};
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,73 +102,96 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        et_manifest_dn = (EditText) findViewById(R.id.et_manifest_dn);
-        et_manifest_dn.setSelection(et_manifest_dn.getText().length());
         actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
-        actv_manifest_customer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        actv_manifest_customer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                getSalesInvoiceForCustomer(actv_manifest_customer.getText().toString());
+            }
+        });
+        /*actv_manifest_customer.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (!hasFocus){
                     // get SI for selected customer (actv_manifest_customer)
+                    getSalesInvoiceForCustomer(actv_manifest_customer.getText().toString());
                     Log.d(TAG,"get SI for: "+actv_manifest_customer.getText());
-                    
+
                 }
             }
-        });
+        });*/
+        spinner_manifest_dn_si = (Spinner) findViewById(R.id.spinner_manifest_dn_si);
+        spinner_manifest_dn_si.setVisibility(View.GONE);
         tv_manifest_intro_label = (TextView) findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
+        tv_form_manifest_cust_label = (TextView) findViewById(R.id.tv_form_manifest_cust_label);
+        tv_form_manifest_dn_label.setVisibility(View.GONE);
         iv_manifest_preview = (ImageView) findViewById(R.id.iv_manifest_preview);
         btn_confirm_manifest = (Button) findViewById(R.id.btn_confirm_manifest);
         btn_try_manifest = (Button) findViewById(R.id.btn_try_manifest);
         btn_capture_manifest = (Button) findViewById(R.id.btn_capture_manifest);
+        btn_capture_manifest.setVisibility(View.GONE);
+        progressBar = (ProgressBar) findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.GONE);
         getAllCustomersFromERP();
         btn_capture_manifest.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
+                // check if DN exists for spinner_manifest_dn_si
+                // create DN if doesn't exists
                 // capture picture
-                if(et_manifest_dn.getText().toString().trim().length()==0){
-                    Toast.makeText(getApplicationContext(),"Please enter Delivery Note ID", Toast.LENGTH_SHORT).show();
-                } else {
-                    // check if DN exists and not submitted
-                    AsyncHttpClient client = new AsyncHttpClient();
-                    RequestParams params = new RequestParams();
-                    manifest_file_name = String.valueOf(et_manifest_dn.getText());
-                    params.put("delivery_note_id",manifest_file_name);
-                    db = new DatabaseHelper(getApplicationContext());
-                    Auth loginProfile = db.getLoginProfile();
-                    final String generatedURL = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.check_dn_for_manifest";
-                    try {
-                        client.post(generatedURL,params,new JsonHttpResponseHandler(){
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params = new RequestParams();
+                sinv_id = String.valueOf(spinner_manifest_dn_si.getSelectedItem());
+                db = new DatabaseHelper(getApplicationContext());
+                Auth loginProfile = db.getLoginProfile();
+                params.put("sinv_id",sinv_id);
+                params.put("owner",loginProfile.getUname());
+                final String generatedURL = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_dn_for_sinv";
+                try {
+                    client.post(generatedURL,params,new JsonHttpResponseHandler(){
 
-                            @Override
-                            public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
-                                try {
-                                    if(response.getString("message").equalsIgnoreCase("Completed") || response.getString("message").equalsIgnoreCase("To Bill")){
-                                        Toast.makeText(getApplicationContext(),"DN is already submitted.", Toast.LENGTH_LONG).show();
-                                    }else if(response.getString("message").equalsIgnoreCase("Cancelled") || response.getString("message").equalsIgnoreCase("Closed")){
-                                        Toast.makeText(getApplicationContext(),"DN is cancelled/closed.", Toast.LENGTH_LONG).show();
-                                    }else if(response.getString("message").equalsIgnoreCase("Draft")){
-                                        captureImage();
-                                    }else if(response.getString("message").equalsIgnoreCase("404")){
-                                        Toast.makeText(getApplicationContext(),"DN not found.", Toast.LENGTH_LONG).show();
-                                    }else{
-                                        Toast.makeText(getApplicationContext(),"Some error occurred in DN check. Please contact admin.", Toast.LENGTH_LONG).show();
-                                    }
-                                } catch (JSONException e) {
-//                                    Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api response");
-                                    e.printStackTrace();
+                        @Override
+                        public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                            try {
+                                String result = response.getString("message");
+                                if(!result.equalsIgnoreCase("404")){
+                                    manifest_file_name = response.getString("message");
+                                    captureImage();
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(getApplicationContext(),"Capture manifest to link with "+response.getString("message"), Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(getApplicationContext(),"Some error occurred in DN check. Please contact admin.", Toast.LENGTH_LONG).show();
                                 }
+                            } catch (JSONException e) {
+//                                    Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api response");
+                                e.printStackTrace();
+                                progressBar.setVisibility(View.GONE);
                             }
+                        }
 
-                            public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+                        public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
 //                                Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
-                            }
-                        });
-                    }catch (Exception e){
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                }catch (Exception e){
 //                        Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
-                    }
+                    progressBar.setVisibility(View.GONE);
                 }
+
 
             }
         });
@@ -172,8 +200,9 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
             File f;
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
+                Toast.makeText(getApplicationContext(), "Please wait...", Toast.LENGTH_LONG).show();
                 /* >> Upload to google drive */
-                manifest_file_name = String.valueOf(et_manifest_dn.getText());
                 Bitmap bitmap = BitmapFactory.decodeFile(getManifestPic(manifest_file_name).getAbsolutePath());
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
@@ -204,8 +233,8 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                 // try again click event
                 tv_manifest_intro_label.setText("Save manifest in just a few clicks. Manifests will be saved in your google drive (configured in ERP) and linked with the specified Delivery Note in ERP");
                 tv_form_manifest_dn_label.setVisibility(View.VISIBLE);
-                et_manifest_dn.setText("");
-                et_manifest_dn.setVisibility(View.VISIBLE);
+                actv_manifest_customer.setText("");
+                actv_manifest_customer.setVisibility(View.VISIBLE);
                 iv_manifest_preview.setVisibility(View.GONE);
                 btn_capture_manifest.setVisibility(View.VISIBLE);
                 btn_confirm_manifest.setVisibility(View.GONE);
@@ -231,6 +260,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                                 new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
                         actv_manifest_customer.setThreshold(1);
                         actv_manifest_customer.setAdapter(adapter);
+//                        spinner_manifest_dn_si.setAdapter(adapter);
                     } catch (IOException e) {
 //                        Log.d(TAG,"IOException in get_all_customers call");
                         e.printStackTrace();
@@ -244,6 +274,54 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 //            Log.d(TAG,"Exception in get_all_customers call");
         }
 //        Log.d(TAG,String.valueOf(customers.length));
+    }
+
+    private void getSalesInvoiceForCustomer(String customer) {
+        db = new DatabaseHelper(getApplicationContext());
+        Auth loginProfile = db.getLoginProfile();
+        String salesInvoiceForCustUrl = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_sinv_for_customer";
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("customer",customer);
+        try {
+            client.post(salesInvoiceForCustUrl ,params,new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    ArrayAdapter<String> adapter;
+                    try {
+                        customers = mapper.readValue(response.getString("message").toString(), String[].class);
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
+                        spinner_manifest_dn_si.setAdapter(adapter);
+                        tv_form_manifest_dn_label.setVisibility(View.VISIBLE);
+                        spinner_manifest_dn_si.setVisibility(View.VISIBLE);
+                        btn_capture_manifest.setVisibility(View.VISIBLE);
+                    } catch (IOException e) {
+//                        Log.d(TAG,"IOException");
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{});
+                        spinner_manifest_dn_si.setAdapter(adapter);
+                        tv_form_manifest_dn_label.setVisibility(View.GONE);
+                        spinner_manifest_dn_si.setVisibility(View.GONE);
+                        btn_capture_manifest.setVisibility(View.GONE);
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+//                        Log.d(TAG,"JSONException");
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{});
+                        spinner_manifest_dn_si.setAdapter(adapter);
+
+                        tv_form_manifest_dn_label.setVisibility(View.GONE);
+                        spinner_manifest_dn_si.setVisibility(View.GONE);
+                        btn_capture_manifest.setVisibility(View.GONE);
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }catch (Exception e){
+            Log.d(TAG,"Exception");
+        }
     }
 
     public void CreateImageOnGoogleDrive(DriveApi.DriveContentsResult result, final byte[] imageDataInput,final String manifest_file_name){
@@ -336,7 +414,6 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     }
     private static File getOutputMediaFile(int type) {
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),IMAGE_DIRECTORY_NAME);
-        manifest_file_name = String.valueOf(et_manifest_dn.getText());
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator
                 + manifest_file_name + ".jpg");
         return mediaFile;
@@ -425,7 +502,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
             AsyncHttpClient client = new AsyncHttpClient();
             RequestParams params = new RequestParams();
             params.put("drive_id",driveId);
-            params.put("dn_id",et_manifest_dn.getText().toString());
+            params.put("dn_id",manifest_file_name);
             db = new DatabaseHelper(getApplicationContext());
             Auth loginProfile = db.getLoginProfile();
             final String generatedURL = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.update_manifest_link_in_dn";
@@ -442,14 +519,21 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 //                            Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api response");
                             e.printStackTrace();
                         }
+                        progressBar.setVisibility(View.GONE);
+                        Toast.makeText(getApplicationContext(), "Completed successfully.", Toast.LENGTH_LONG).show();
+                        Intent intent = getIntent();
+                        finish();
+                        startActivity(intent);
                     }
 
                     public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
 //                        Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
             }catch (Exception e){
 //                Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
+                progressBar.setVisibility(View.GONE);
             }
         }
     };
@@ -505,9 +589,11 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private void previewCapturedImage(){
 
         try {
-            tv_manifest_intro_label.setText("Confirm to link the manifest to "+et_manifest_dn.getText());
+            tv_manifest_intro_label.setText("Confirm to link the manifest to "+manifest_file_name);
             tv_form_manifest_dn_label.setVisibility(View.GONE);
-            et_manifest_dn.setVisibility(View.GONE);
+            actv_manifest_customer.setVisibility(View.GONE);
+            tv_form_manifest_cust_label.setVisibility(View.GONE);
+            spinner_manifest_dn_si.setVisibility(View.GONE);
             iv_manifest_preview.setVisibility(View.VISIBLE);
             btn_capture_manifest.setVisibility(View.GONE);
             btn_confirm_manifest.setVisibility(View.VISIBLE);

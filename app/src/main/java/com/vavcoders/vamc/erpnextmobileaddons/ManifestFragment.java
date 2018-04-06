@@ -108,7 +108,6 @@ public class ManifestFragment extends Fragment implements GoogleApiClient.Connec
         view = inflater.inflate(R.layout.fragment_manifest, container, false);
         btn_capture_manifest = (Button) view.findViewById(R.id.btn_capture_manifest);
         iv_manifest_preview = (ImageView) view.findViewById(R.id.iv_manifest_preview);
-        et_manifest_dn = (EditText) view.findViewById(R.id.et_manifest_dn);
         tv_manifest_intro_label = (TextView) view.findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) view.findViewById(R.id.tv_form_manifest_dn_label);
         btn_confirm_manifest = (Button) view.findViewById(R.id.btn_confirm_manifest);

@@ -39,23 +39,19 @@
         android:id="@+id/tv_form_manifest_dn_label"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enter Delivery Note ID:"
+        android:text="Select Sales Invoice:"
         android:textStyle="bold"
         android:layout_marginLeft="20dp"
         />
-    <EditText
-        android:id="@+id/et_manifest_dn"
+    <Spinner
+        android:id="@+id/spinner_manifest_dn_si"
         android:layout_width="match_parent"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_marginBottom="20dp"
         android:layout_height="60dp"
-        android:hint="for eg., DN-00001"
-        android:text="DN-"
-        android:inputType="textCapCharacters"
-        android:singleLine="true">
-    </EditText>
+        android:spinnerMode="dropdown"/>
     <Button
         android:id="@+id/btn_capture_manifest"
         android:layout_width="wrap_content"

@@ -24,7 +24,7 @@ android:padding="@dimen/appbar_padding_top">
         android:layout_marginLeft="20dp"
         />
     <EditText
-        android:id="@+id/et_manifest_dn"
+        android:id="@+id/et_manifest_dn_not_used"
         android:layout_width="match_parent"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="20dp"
