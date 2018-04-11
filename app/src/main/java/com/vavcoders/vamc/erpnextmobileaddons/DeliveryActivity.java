@@ -320,7 +320,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                 }
             });
         }catch (Exception e){
-            Log.d(TAG,"Exception");
+//            Log.d(TAG,"Exception");
         }
     }
 
@@ -434,6 +434,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .build();
+
         }
 
         mGoogleApiClient.connect();
@@ -444,6 +445,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         super.onStop();
         if (mGoogleApiClient != null) {
 
+//            Toast.makeText(getApplicationContext(), "Disconnecting from Google Drive", Toast.LENGTH_LONG).show();
             // disconnect Google Android Drive API connection.
             mGoogleApiClient.disconnect();
         }
@@ -455,8 +457,9 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 
         // Called whenever the API client fails to connect.
 //        Log.d(TAG, "GoogleApiClient connection failed: " + result.toString());
-
+        Toast.makeText(getApplicationContext(), "Google Drive connection failure: "+result.toString(), Toast.LENGTH_LONG).show();
         if (!result.hasResolution()) {
+//            Log.d(TAG, "hasResolution");
 
             // show the localized error dialog.
             GoogleApiAvailability.getInstance().getErrorDialog(this, result.getErrorCode(), 0).show();
@@ -470,7 +473,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
          */
 
         try {
-
+//            Log.d(TAG,"trying startResolutionForResult");
             result.startResolutionForResult(this, REQUEST_CODE_RESOLUTION);
 
         } catch (IntentSender.SendIntentException e) {
@@ -482,6 +485,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     @Override
     public void onConnected(Bundle connectionHint) {
 //        Log.d(TAG,"Connected to Google Drive");
+        Toast.makeText(getApplicationContext(), "Connected to Google Drive.", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -547,6 +551,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                         Toast.makeText(getApplicationContext(), "Uploaded to Google Drive", Toast.LENGTH_LONG).show();
 
                         DriveId File_Uncompleted_Id = result.getDriveFile().getDriveId();
+
                         DriveFile file = Drive.DriveApi.getFile(mGoogleApiClient, File_Uncompleted_Id);
                         file.addChangeListener(mGoogleApiClient, uploadedFileUrlToERP);
 //                        String driveId = result.getDriveFile().getDriveId().toString();
