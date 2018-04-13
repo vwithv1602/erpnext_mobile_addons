@@ -19,6 +19,8 @@
 
     <uses-feature android:name="android.hardware.camera" />
 
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -61,10 +63,20 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+        <!--For Google Sign in -->
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"-->
+            <!--android:value="527633323072-mq8i328glc69001esgokrt0ndionrher.apps.googleusercontent.com" />-->
 
         <meta-data
             android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"
-            android:value="527633323072-mq8i328glc69001esgokrt0ndionrher.apps.googleusercontent.com" />
+            android:value="527633323072-a217jtj67hmr9smft62b992lnqm22msm.apps.googleusercontent.com" />
+
+
+        <!--For Upload to Google Drive-->
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"-->
+            <!--android:value="527633323072-a217jtj67hmr9smft62b992lnqm22msm.apps.googleusercontent.com" />-->
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
@@ -73,6 +85,15 @@
         <activity
             android:name=".DeliveryActivity"
             android:label="@string/title_activity_delivery"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.vavcoders.vamc.erpnextmobileaddons.MainActivity" />
+        </activity>
+        <activity
+            android:name=".VideoUploadActivity"
+            android:label="@string/title_activity_video_upload"
             android:parentActivityName=".MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
