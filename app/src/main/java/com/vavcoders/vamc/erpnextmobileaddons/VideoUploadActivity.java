@@ -8,11 +8,18 @@ import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccoun
 import com.google.api.client.googleapis.extensions.android.gms.auth.GooglePlayServicesAvailabilityIOException;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.googleapis.media.MediaHttpUploader;
+import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
 import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.InputStreamContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.ExponentialBackOff;
 
+import com.google.api.client.util.store.FileDataStoreFactory;
+import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.YouTubeScopes;
 
 import com.google.api.services.youtube.model.*;
@@ -30,6 +37,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.AssetFileDescriptor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -60,14 +68,19 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 import cz.msebera.android.httpclient.Header;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+
 
 public class VideoUploadActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
@@ -94,7 +107,40 @@ public class VideoUploadActivity extends AppCompatActivity
 
     private static final String BUTTON_TEXT = "Call YouTube Data API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
-    private static final String[] SCOPES = { YouTubeScopes.YOUTUBE_READONLY };
+    File file;
+
+    /** Application name. */
+    private static final String APPLICATION_NAME = "API Sample";
+
+    /** Directory to store user credentials for this application. */
+    private static final java.io.File DATA_STORE_DIR = new java.io.File(
+            System.getProperty("user.home"), ".credentials/java-youtube-api-tests");
+
+    /** Global instance of the {@link FileDataStoreFactory}. */
+    private static FileDataStoreFactory DATA_STORE_FACTORY;
+
+    /** Global instance of the JSON factory. */
+    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+
+    /** Global instance of the HTTP transport. */
+    private static HttpTransport HTTP_TRANSPORT;
+
+    /** Global instance of the scopes required by this quickstart.
+     *
+     * If modifying these scopes, delete your previously saved credentials
+     * at ~/.credentials/drive-java-quickstart
+     */
+    private static final String[] SCOPES = {YouTubeScopes.YOUTUBE_READONLY,YouTubeScopes.YOUTUBE_FORCE_SSL,YouTubeScopes.YOUTUBEPARTNER};
+
+//    static {
+//        try {
+//            HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+//            DATA_STORE_FACTORY = new FileDataStoreFactory(DATA_STORE_DIR);
+//        } catch (Throwable t) {
+//            t.printStackTrace();
+//            System.exit(1);
+//        }
+//    }
 
     /**
      * Create the main activity.
@@ -318,6 +364,7 @@ public class VideoUploadActivity extends AppCompatActivity
      * appropriate.
      */
     private void getResultsFromApi() {
+        Log.d(TAG,"In getResultsFromApi");
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
@@ -412,6 +459,39 @@ public class VideoUploadActivity extends AppCompatActivity
             case CAMERA_CAPTURE_VIDEO_REQUEST_CODE:
                 if(resultCode == RESULT_OK){
                     Log.d(TAG,"ResultOK");
+                    progressDialog.setMessage("Saving video to device");
+                    progressDialog.show();
+                    /* >> Storing in another location*/
+                    try{
+                        AssetFileDescriptor videoAsset = getContentResolver().openAssetFileDescriptor(fileUri, "r");
+                        FileInputStream fis = videoAsset.createInputStream();
+                        File root=new File(Environment.getExternalStorageDirectory(),"ERPNextMobileAddonsVideos");
+
+                        if (!root.exists()) {
+                            root.mkdirs();
+                        }
+
+                        file=new File(root,manifest_file_name+".mp4" );
+                        Log.d(TAG,"File storage absolute path: "+file.getAbsolutePath());
+                        Log.d(TAG,"File storage path: "+file.getPath());
+                        Log.d(TAG,"File storage canonical path: "+file.getCanonicalPath());
+                        Log.d(TAG,"FileURI: "+fileUri.getPath());
+                        FileOutputStream fos = new FileOutputStream(file);
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while ((len = fis.read(buf)) > 0) {
+                            fos.write(buf, 0, len);
+                        }
+                        fis.close();
+                        fos.close();
+                        getResultsFromApi();
+                    }catch (Exception e){
+                        Log.d(TAG,"File storing in another location exception");
+                        Log.d(TAG,e.getMessage());
+                    }
+
+                    /* << Storing in another location*/
+
                 }else if(resultCode == RESULT_CANCELED){
                     Log.d(TAG,"ResultCancelled");
                 }else{
@@ -541,7 +621,8 @@ public class VideoUploadActivity extends AppCompatActivity
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
-                return getDataFromApi();
+//                return getDataFromApi();
+                return uploadVideoToYoutube(fileUri.getPath());
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -570,6 +651,82 @@ public class VideoUploadActivity extends AppCompatActivity
             return channelInfo;
         }
 
+        private List<String> uploadVideoToYoutube(String media_filename) throws IOException{
+            progressDialog.setMessage("Uploading video to youtube");
+            progressDialog.show();
+            try{
+                String mime_type = "video/*";
+//                String media_filename = "sample_video.flv";
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("part", "snippet,status");
+
+
+                Video video = new Video();
+                VideoSnippet snippet = new VideoSnippet();
+                snippet.set("categoryId", "22");
+                snippet.set("description", "Packing video of the product");
+                snippet.set("title", actv_manifest_customer.getText() + " - " + manifest_file_name);
+                VideoStatus status = new VideoStatus();
+                status.set("privacyStatus", "private");
+
+                video.setSnippet(snippet);
+                video.setStatus(status);
+
+                Log.d(TAG,"TRYING TO GET");
+                Log.d(TAG,Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
+                Log.d(TAG,"1");
+
+//                InputStreamContent mediaContent = new InputStreamContent(mime_type,
+//                        VideoUploadActivity.class.getResourceAsStream(Environment.getExternalStorageDirectory().getPath()+"ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4"));
+                FileInputStream fileInputStream = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
+                InputStreamContent mediaContent = new InputStreamContent(mime_type,fileInputStream);
+                Log.d(TAG,"2");
+                YouTube.Videos.Insert videosInsertRequest = mService.videos().insert(parameters.get("part").toString(), video, mediaContent);
+                Log.d(TAG,"3");
+                MediaHttpUploader uploader = videosInsertRequest.getMediaHttpUploader();
+                Log.d(TAG,"4");
+
+
+                uploader.setDirectUploadEnabled(false);
+                Log.d(TAG,"5");
+                MediaHttpUploaderProgressListener progressListener = new MediaHttpUploaderProgressListener() {
+                    public void progressChanged(MediaHttpUploader uploader) throws IOException {
+                        Log.d(TAG,"6");
+                        switch (uploader.getUploadState()) {
+                            case INITIATION_STARTED:
+                                Log.d(TAG,"Initiation Started");
+                                break;
+                            case INITIATION_COMPLETE:
+                                Log.d(TAG,"Initiation Completed");
+                                break;
+                            case MEDIA_IN_PROGRESS:
+                                Log.d(TAG,"Upload in progress");
+                                Log.d(TAG,"Upload percentage: " + uploader.getProgress());
+                                break;
+                            case MEDIA_COMPLETE:
+                                Log.d(TAG,"Upload Completed!");
+                                break;
+                            case NOT_STARTED:
+                                Log.d(TAG,"Upload Not Started!");
+                                break;
+                        }
+                    }
+                };
+                uploader.setProgressListener(progressListener);
+                Video response = videosInsertRequest.execute();
+            } catch (GoogleJsonResponseException e) {
+                Log.d(TAG,"In GoogleJsonResponseException");
+                e.printStackTrace();
+                System.err.println("There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
+            } catch (Throwable t) {
+                Log.d(TAG,"In Throwable exception");
+                Log.d(TAG,t.toString());
+                Log.d(TAG,t.getLocalizedMessage());
+                Log.d(TAG,t.getMessage());
+                t.printStackTrace();
+            }
+            return Arrays.asList();
+        }
 
         @Override
         protected void onPreExecute() {
