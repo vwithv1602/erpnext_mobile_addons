@@ -131,11 +131,14 @@ public class VideoUploadActivity extends AppCompatActivity
         mCallApiButton = (Button) findViewById(R.id.btn_test_youtube);
         mOutputText = (TextView) findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
+        tv_form_manifest_dn_label.setVisibility(View.GONE);
         tv_form_manifest_cust_label = (TextView) findViewById(R.id.tv_form_manifest_cust_label);
         btn_confirm_manifest = (Button) findViewById(R.id.btn_confirm_manifest);
         btn_try_manifest = (Button) findViewById(R.id.btn_try_manifest);
         btn_capture_video = (Button) findViewById(R.id.btn_capture_video);
+        btn_capture_video.setVisibility(View.GONE);
         spinner_manifest_dn_si = (Spinner) findViewById(R.id.spinner_manifest_dn_si);
+        spinner_manifest_dn_si.setVisibility(View.GONE);
         getAllCustomersFromERP();
         btn_capture_video.setOnClickListener(new View.OnClickListener() {
 
