@@ -165,7 +165,7 @@ public class VideoUploadActivity extends AppCompatActivity
                                     manifest_file_name = response.getString("message");
                                     captureVideo();
                                     progressDialog.hide();
-                                    Toast.makeText(getApplicationContext(),"Capture manifest to link with "+response.getString("message"), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getApplicationContext(),"Record video of packing which will link with "+response.getString("message"), Toast.LENGTH_SHORT).show();
                                 }else{
                                     Toast.makeText(getApplicationContext(),"Some error occurred in DN check. Please contact admin.", Toast.LENGTH_LONG).show();
                                 }
@@ -223,7 +223,7 @@ public class VideoUploadActivity extends AppCompatActivity
         return FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(type));
     }
     private static File getOutputMediaFile(int type) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),VIDEO_DIRECTORY_NAME);
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),VIDEO_DIRECTORY_NAME);
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator
                 + manifest_file_name + ".mp4");
         return mediaFile;
@@ -404,6 +404,15 @@ public class VideoUploadActivity extends AppCompatActivity
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
                     getResultsFromApi();
+                }
+                break;
+            case CAMERA_CAPTURE_VIDEO_REQUEST_CODE:
+                if(resultCode == RESULT_OK){
+                    Log.d(TAG,"ResultOK");
+                }else if(resultCode == RESULT_CANCELED){
+                    Log.d(TAG,"ResultCancelled");
+                }else{
+                    Log.d(TAG,"Something bad happened... onActivityResult");
                 }
                 break;
         }
