@@ -32,9 +32,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -50,10 +54,12 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,19 +72,25 @@ import pub.devrel.easypermissions.EasyPermissions;
 public class VideoUploadActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
     private static final String TAG = "VamCLog";
+    private String sinv_id;
+    private static String manifest_file_name;
     GoogleAccountCredential mCredential;
     private TextView mOutputText,tv_manifest_intro_label,tv_form_manifest_dn_label,tv_form_manifest_cust_label;
     private Button mCallApiButton,btn_capture_video,btn_confirm_manifest,btn_try_manifest;
-    ProgressDialog mProgress;
+    ProgressDialog progressDialog;
     private static AutoCompleteTextView actv_manifest_customer;
     DatabaseHelper db;
     public String[] customers = {};
     private Spinner spinner_manifest_dn_si;
+    private Uri fileUri;
 
+    public static final int MEDIA_TYPE_VIDEO = 1;
+    private static final int CAMERA_CAPTURE_VIDEO_REQUEST_CODE = 100;
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
     static final int REQUEST_GOOGLE_PLAY_SERVICES = 1002;
     static final int REQUEST_PERMISSION_GET_ACCOUNTS = 1003;
+    private static final String VIDEO_DIRECTORY_NAME = "ERPNextMobileAddons";
 
     private static final String BUTTON_TEXT = "Call YouTube Data API";
     private static final String PREF_ACCOUNT_NAME = "accountName";
@@ -115,7 +127,7 @@ public class VideoUploadActivity extends AppCompatActivity
                 getSalesInvoiceForCustomer(actv_manifest_customer.getText().toString());
             }
         });
-
+        progressDialog = new ProgressDialog(this);
         mCallApiButton = (Button) findViewById(R.id.btn_test_youtube);
         mOutputText = (TextView) findViewById(R.id.tv_manifest_intro_label);
         tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
@@ -125,6 +137,59 @@ public class VideoUploadActivity extends AppCompatActivity
         btn_capture_video = (Button) findViewById(R.id.btn_capture_video);
         spinner_manifest_dn_si = (Spinner) findViewById(R.id.spinner_manifest_dn_si);
         getAllCustomersFromERP();
+        btn_capture_video.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                progressDialog.setMessage("Looking for delivery note...");
+                progressDialog.show();
+                // check if DN exists for spinner_manifest_dn_si
+                // create DN if doesn't exists
+                // capture picture
+                AsyncHttpClient client = new AsyncHttpClient();
+                RequestParams params = new RequestParams();
+                sinv_id = String.valueOf(spinner_manifest_dn_si.getSelectedItem());
+                db = new DatabaseHelper(getApplicationContext());
+                Auth loginProfile = db.getLoginProfile();
+                params.put("sinv_id",sinv_id);
+                params.put("owner",loginProfile.getUname());
+                final String generatedURL = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_dn_for_sinv";
+                try {
+                    client.post(generatedURL,params,new JsonHttpResponseHandler(){
+
+                        @Override
+                        public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                            try {
+                                String result = response.getString("message");
+                                if(!result.equalsIgnoreCase("404")){
+                                    manifest_file_name = response.getString("message");
+                                    captureVideo();
+                                    progressDialog.hide();
+                                    Toast.makeText(getApplicationContext(),"Capture manifest to link with "+response.getString("message"), Toast.LENGTH_SHORT).show();
+                                }else{
+                                    Toast.makeText(getApplicationContext(),"Some error occurred in DN check. Please contact admin.", Toast.LENGTH_LONG).show();
+                                }
+                            } catch (JSONException e) {
+//                                    Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api response");
+                                e.printStackTrace();
+                                progressDialog.hide();
+                            }
+                        }
+
+                        public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+//                                Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
+                            progressDialog.hide();
+                        }
+                    });
+                }catch (Exception e){
+//                        Log.d("VamCLog","Exception raised in 'check_dn_for_manifest' api call");
+                    progressDialog.hide();
+                }
+
+
+            }
+        });
+
         mCallApiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,13 +202,31 @@ public class VideoUploadActivity extends AppCompatActivity
 
 
 
-        mProgress = new ProgressDialog(this);
-        mProgress.setMessage("Calling YouTube Data API ...");
+
+        progressDialog.setMessage("Calling YouTube Data API ...");
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+    }
+    private void captureVideo() {
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        fileUri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);
+        Log.d(TAG,"fileURI: "+fileUri.getPath());
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
+        // start the image capture Intent
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        startActivityForResult(intent, CAMERA_CAPTURE_VIDEO_REQUEST_CODE);
+    }
+    public Uri getOutputMediaFileUri(int type) {
+        return FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(type));
+    }
+    private static File getOutputMediaFile(int type) {
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES),VIDEO_DIRECTORY_NAME);
+        File mediaFile = new File(mediaStorageDir.getPath() + File.separator
+                + manifest_file_name + ".mp4");
+        return mediaFile;
     }
     public void getAllCustomersFromERP(){
         db = new DatabaseHelper(getApplicationContext());
@@ -183,7 +266,6 @@ public class VideoUploadActivity extends AppCompatActivity
         AsyncHttpClient client = new AsyncHttpClient();
         RequestParams params = new RequestParams();
         params.put("customer",customer);
-        Log.d(TAG,customer);
         try {
             client.post(salesInvoiceForCustUrl ,params,new JsonHttpResponseHandler(){
                 @Override
@@ -191,7 +273,6 @@ public class VideoUploadActivity extends AppCompatActivity
                     ObjectMapper mapper = new ObjectMapper();
                     ArrayAdapter<String> adapter;
                     try {
-                        Log.d(TAG,response.getString("message"));
                         customers = mapper.readValue(response.getString("message").toString(), String[].class);
                         adapter =
                                 new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
@@ -481,12 +562,12 @@ public class VideoUploadActivity extends AppCompatActivity
         @Override
         protected void onPreExecute() {
             mOutputText.setText("");
-            mProgress.show();
+            progressDialog.show();
         }
 
         @Override
         protected void onPostExecute(List<String> output) {
-            mProgress.hide();
+            progressDialog.hide();
             if (output == null || output.size() == 0) {
                 mOutputText.setText("No results returned.");
             } else {
@@ -497,7 +578,7 @@ public class VideoUploadActivity extends AppCompatActivity
 
         @Override
         protected void onCancelled() {
-            mProgress.hide();
+            progressDialog.hide();
             if (mLastError != null) {
                 if (mLastError instanceof GooglePlayServicesAvailabilityIOException) {
                     showGooglePlayServicesAvailabilityErrorDialog(
