@@ -1,5 +1,6 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -15,6 +16,11 @@ import com.google.api.client.util.ExponentialBackOff;
 import com.google.api.services.youtube.YouTubeScopes;
 
 import com.google.api.services.youtube.model.*;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.vavcoders.vamc.helper.DatabaseHelper;
+import com.vavcoders.vamc.model.Auth;
 
 import android.Manifest;
 import android.accounts.AccountManager;
@@ -29,28 +35,45 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import cz.msebera.android.httpclient.Header;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class VideoUploadActivity extends Activity
+public class VideoUploadActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
+    private static final String TAG = "VamCLog";
     GoogleAccountCredential mCredential;
-    private TextView mOutputText;
-    private Button mCallApiButton;
+    private TextView mOutputText,tv_manifest_intro_label,tv_form_manifest_dn_label,tv_form_manifest_cust_label;
+    private Button mCallApiButton,btn_capture_video,btn_confirm_manifest,btn_try_manifest;
     ProgressDialog mProgress;
+    private static AutoCompleteTextView actv_manifest_customer;
+    DatabaseHelper db;
+    public String[] customers = {};
+    private Spinner spinner_manifest_dn_si;
 
     static final int REQUEST_ACCOUNT_PICKER = 1000;
     static final int REQUEST_AUTHORIZATION = 1001;
@@ -68,20 +91,40 @@ public class VideoUploadActivity extends Activity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        LinearLayout activityLayout = new LinearLayout(this);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        activityLayout.setLayoutParams(lp);
-        activityLayout.setOrientation(LinearLayout.VERTICAL);
-        activityLayout.setPadding(16, 16, 16, 16);
+        setContentView(R.layout.activity_video_upload);
 
-        ViewGroup.LayoutParams tlp = new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Packing Video Upload");
 
-        mCallApiButton = new Button(this);
-        mCallApiButton.setText(BUTTON_TEXT);
+        actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
+        actv_manifest_customer.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                getSalesInvoiceForCustomer(actv_manifest_customer.getText().toString());
+            }
+        });
+
+        mCallApiButton = (Button) findViewById(R.id.btn_test_youtube);
+        mOutputText = (TextView) findViewById(R.id.tv_manifest_intro_label);
+        tv_form_manifest_dn_label = (TextView) findViewById(R.id.tv_form_manifest_dn_label);
+        tv_form_manifest_cust_label = (TextView) findViewById(R.id.tv_form_manifest_cust_label);
+        btn_confirm_manifest = (Button) findViewById(R.id.btn_confirm_manifest);
+        btn_try_manifest = (Button) findViewById(R.id.btn_try_manifest);
+        btn_capture_video = (Button) findViewById(R.id.btn_capture_video);
+        spinner_manifest_dn_si = (Spinner) findViewById(R.id.spinner_manifest_dn_si);
+        getAllCustomersFromERP();
         mCallApiButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,29 +134,97 @@ public class VideoUploadActivity extends Activity
                 mCallApiButton.setEnabled(true);
             }
         });
-        activityLayout.addView(mCallApiButton);
 
-        mOutputText = new TextView(this);
-        mOutputText.setLayoutParams(tlp);
-        mOutputText.setPadding(16, 16, 16, 16);
-        mOutputText.setVerticalScrollBarEnabled(true);
-        mOutputText.setMovementMethod(new ScrollingMovementMethod());
-        mOutputText.setText(
-                "Click the \'" + BUTTON_TEXT +"\' button to test the API.");
-        activityLayout.addView(mOutputText);
+
 
         mProgress = new ProgressDialog(this);
         mProgress.setMessage("Calling YouTube Data API ...");
-
-        setContentView(activityLayout);
 
         // Initialize credentials and service object.
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
     }
+    public void getAllCustomersFromERP(){
+        db = new DatabaseHelper(getApplicationContext());
+        Auth loginProfile = db.getLoginProfile();
+        String customerUrl = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_all_customers";
+        AsyncHttpClient client = new AsyncHttpClient();
+        try {
+            client.get(customerUrl,new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    try {
+                        customers = mapper.readValue(response.getString("message").toString(), String[].class);
+                        ArrayAdapter<String> adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
+                        actv_manifest_customer.setThreshold(1);
+                        actv_manifest_customer.setAdapter(adapter);
+//                        spinner_manifest_dn_si.setAdapter(adapter);
+                    } catch (IOException e) {
+//                        Log.d(TAG,"IOException in get_all_customers call");
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+//                        Log.d(TAG,"JSONException in get_all_customers call");
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }catch (Exception e){
+//            Log.d(TAG,"Exception in get_all_customers call");
+        }
+//        Log.d(TAG,String.valueOf(customers.length));
+    }
+    private void getSalesInvoiceForCustomer(String customer) {
+        db = new DatabaseHelper(getApplicationContext());
+        Auth loginProfile = db.getLoginProfile();
+        String salesInvoiceForCustUrl = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.get_sinv_for_customer";
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("customer",customer);
+        Log.d(TAG,customer);
+        try {
+            client.post(salesInvoiceForCustUrl ,params,new JsonHttpResponseHandler(){
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    ArrayAdapter<String> adapter;
+                    try {
+                        Log.d(TAG,response.getString("message"));
+                        customers = mapper.readValue(response.getString("message").toString(), String[].class);
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, customers);
+                        spinner_manifest_dn_si.setAdapter(adapter);
+                        tv_form_manifest_dn_label.setVisibility(View.VISIBLE);
+                        spinner_manifest_dn_si.setVisibility(View.VISIBLE);
+                        btn_capture_video.setVisibility(View.VISIBLE);
+                    } catch (IOException e) {
+//                        Log.d(TAG,"IOException");
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{});
+                        spinner_manifest_dn_si.setAdapter(adapter);
+                        tv_form_manifest_dn_label.setVisibility(View.GONE);
+                        spinner_manifest_dn_si.setVisibility(View.GONE);
+                        btn_capture_video.setVisibility(View.GONE);
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+//                        Log.d(TAG,"JSONException");
+                        adapter =
+                                new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, new String[]{});
+                        spinner_manifest_dn_si.setAdapter(adapter);
 
-
+                        tv_form_manifest_dn_label.setVisibility(View.GONE);
+                        spinner_manifest_dn_si.setVisibility(View.GONE);
+                        btn_capture_video.setVisibility(View.GONE);
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }catch (Exception e){
+//            Log.d(TAG,"Exception");
+        }
+    }
 
     /**
      * Attempt to call the API, after verifying that all the preconditions are
