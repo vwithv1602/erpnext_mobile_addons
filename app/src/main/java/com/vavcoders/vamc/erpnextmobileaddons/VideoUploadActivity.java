@@ -262,7 +262,6 @@ public class VideoUploadActivity extends AppCompatActivity
     private void captureVideo() {
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
         fileUri = getOutputMediaFileUri(MEDIA_TYPE_VIDEO);
-        Log.d(TAG,"fileURI: "+fileUri.getPath());
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri);
         // start the image capture Intent
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -364,7 +363,6 @@ public class VideoUploadActivity extends AppCompatActivity
      * appropriate.
      */
     private void getResultsFromApi() {
-        Log.d(TAG,"In getResultsFromApi");
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
@@ -458,7 +456,6 @@ public class VideoUploadActivity extends AppCompatActivity
                 break;
             case CAMERA_CAPTURE_VIDEO_REQUEST_CODE:
                 if(resultCode == RESULT_OK){
-                    Log.d(TAG,"ResultOK");
                     progressDialog.setMessage("Saving video to device");
                     progressDialog.show();
                     /* >> Storing in another location*/
@@ -472,10 +469,6 @@ public class VideoUploadActivity extends AppCompatActivity
                         }
 
                         file=new File(root,manifest_file_name+".mp4" );
-                        Log.d(TAG,"File storage absolute path: "+file.getAbsolutePath());
-                        Log.d(TAG,"File storage path: "+file.getPath());
-                        Log.d(TAG,"File storage canonical path: "+file.getCanonicalPath());
-                        Log.d(TAG,"FileURI: "+fileUri.getPath());
                         FileOutputStream fos = new FileOutputStream(file);
                         byte[] buf = new byte[1024];
                         int len;
@@ -493,9 +486,9 @@ public class VideoUploadActivity extends AppCompatActivity
                     /* << Storing in another location*/
 
                 }else if(resultCode == RESULT_CANCELED){
-                    Log.d(TAG,"ResultCancelled");
+//                    Log.d(TAG,"ResultCancelled");
                 }else{
-                    Log.d(TAG,"Something bad happened... onActivityResult");
+//                    Log.d(TAG,"Something bad happened... onActivityResult");
                 }
                 break;
         }
@@ -672,57 +665,51 @@ public class VideoUploadActivity extends AppCompatActivity
                 video.setSnippet(snippet);
                 video.setStatus(status);
 
-                Log.d(TAG,"TRYING TO GET");
-                Log.d(TAG,Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
-                Log.d(TAG,"1");
-
 //                InputStreamContent mediaContent = new InputStreamContent(mime_type,
 //                        VideoUploadActivity.class.getResourceAsStream(Environment.getExternalStorageDirectory().getPath()+"ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4"));
                 FileInputStream fileInputStream = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
                 InputStreamContent mediaContent = new InputStreamContent(mime_type,fileInputStream);
-                Log.d(TAG,"2");
                 YouTube.Videos.Insert videosInsertRequest = mService.videos().insert(parameters.get("part").toString(), video, mediaContent);
-                Log.d(TAG,"3");
                 MediaHttpUploader uploader = videosInsertRequest.getMediaHttpUploader();
-                Log.d(TAG,"4");
-
 
                 uploader.setDirectUploadEnabled(false);
-                Log.d(TAG,"5");
                 MediaHttpUploaderProgressListener progressListener = new MediaHttpUploaderProgressListener() {
                     public void progressChanged(MediaHttpUploader uploader) throws IOException {
-                        Log.d(TAG,"6");
                         switch (uploader.getUploadState()) {
                             case INITIATION_STARTED:
-                                Log.d(TAG,"Initiation Started");
                                 break;
                             case INITIATION_COMPLETE:
-                                Log.d(TAG,"Initiation Completed");
                                 break;
                             case MEDIA_IN_PROGRESS:
-                                Log.d(TAG,"Upload in progress");
-                                Log.d(TAG,"Upload percentage: " + uploader.getProgress());
                                 break;
                             case MEDIA_COMPLETE:
                                 Log.d(TAG,"Upload Completed!");
+
                                 break;
                             case NOT_STARTED:
-                                Log.d(TAG,"Upload Not Started!");
                                 break;
                         }
                     }
                 };
                 uploader.setProgressListener(progressListener);
                 Video response = videosInsertRequest.execute();
+                final String youtube_video_id = response.getId();
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        /* Update video_id in Delivery Note*/
+                        update_youtube_link_in_erp(youtube_video_id);
+
+                    }
+                });
+
             } catch (GoogleJsonResponseException e) {
                 Log.d(TAG,"In GoogleJsonResponseException");
                 e.printStackTrace();
-                System.err.println("There was a service error: " + e.getDetails().getCode() + " : " + e.getDetails().getMessage());
             } catch (Throwable t) {
                 Log.d(TAG,"In Throwable exception");
                 Log.d(TAG,t.toString());
-                Log.d(TAG,t.getLocalizedMessage());
-                Log.d(TAG,t.getMessage());
                 t.printStackTrace();
             }
             return Arrays.asList();
@@ -764,6 +751,50 @@ public class VideoUploadActivity extends AppCompatActivity
             } else {
                 mOutputText.setText("Request cancelled.");
             }
+        }
+    }
+
+    private void update_youtube_link_in_erp(String video_id) {
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("video_id",video_id);
+        params.put("dn_id",manifest_file_name);
+        db = new DatabaseHelper(getApplicationContext());
+        Auth loginProfile = db.getLoginProfile();
+        final String generatedURL = "http://"+loginProfile.getUrl()+"/api/method/erpnext_mobile_addons.update_youtube_link_in_dn";
+        try {
+            client.post(generatedURL,params,new JsonHttpResponseHandler(){
+
+                @Override
+                public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                    try {
+                        Log.d(TAG,"Response from api: "+response.getString("message"));
+                        if(response.getString("message")=="Success"){
+
+                        }
+                    } catch (JSONException e) {
+                        Log.d(TAG,"Exception raised in update_youtube_link_in_dn api response");
+                        Log.d(TAG,e.getMessage());
+                        e.printStackTrace();
+                    }
+                    progressDialog.setMessage("Completed successfully");
+                    progressDialog.show();
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+
+                public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+//                        Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
+                    progressDialog.setMessage("Error occurred in server API. Contact administrator");
+                    Log.d(TAG,"Failure after connecting with server API");
+                }
+            });
+        }catch (Exception e){
+//                Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
+            progressDialog.setMessage("Error in connection with server API. Contact administrator");
+            Log.d(TAG,"Exception in connection with server API");
         }
     }
 }

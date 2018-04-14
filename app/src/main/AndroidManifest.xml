@@ -4,7 +4,7 @@
 
     <uses-sdk
         android:minSdkVersion="8"
-        android:targetSdkVersion="24" />
+        android:targetSdkVersion="20" />
 
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.INTERNET" />
