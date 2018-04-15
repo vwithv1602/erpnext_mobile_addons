@@ -1,6 +1,7 @@
 package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -92,6 +93,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
     private String sinv_id;
     public String[] customers = {};
     ProgressBar progressBar;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,6 +104,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Manifest Upload");
+        progressDialog = new ProgressDialog(this);
 
         actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
         actv_manifest_customer.addTextChangedListener(new TextWatcher() {
@@ -201,14 +204,13 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
             File f;
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
-                Toast.makeText(getApplicationContext(), "Please wait...", Toast.LENGTH_LONG).show();
+                progressDialog.setMessage("Uploading to drive...");
+                progressDialog.show();
                 /* >> Upload to google drive */
                 Bitmap bitmap = BitmapFactory.decodeFile(getManifestPic(manifest_file_name).getAbsolutePath());
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 70, stream);
                 imageData = stream.toByteArray();
-
                 final ResultCallback<DriveApi.DriveContentsResult> driveContentsCallback =
                         new ResultCallback<DriveApi.DriveContentsResult>() {
                             @Override
@@ -222,9 +224,6 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
                         .setResultCallback(driveContentsCallback);
 
                 /* << Upload to google drive */
-
-
-
             }
         });
         btn_try_manifest.setOnClickListener(new View.OnClickListener() {
@@ -524,8 +523,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 //                            Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api response");
                             e.printStackTrace();
                         }
-                        progressBar.setVisibility(View.GONE);
-                        Toast.makeText(getApplicationContext(), "Completed successfully.", Toast.LENGTH_LONG).show();
+                        progressDialog.setMessage("Completed successfully");
                         Intent intent = getIntent();
                         finish();
                         startActivity(intent);

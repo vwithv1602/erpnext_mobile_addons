@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,6 +29,7 @@ import static com.vavcoders.vamc.model.Settings.LEAD_SYNC;
  */
 
 public class LeadSyncFragment extends Fragment {
+    private static final String TAG = "VamCLog";
     View myView;
     Button btn_sync_toggle,btn_force_sync;
     DatabaseHelper db;
@@ -65,7 +67,7 @@ public class LeadSyncFragment extends Fragment {
             }
         });
         Calendar calander = Calendar.getInstance();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String currentDateTimeString = simpleDateFormat.format(calander.getTime());
         et_force_datetime = myView.findViewById(R.id.et_force_datetime);
         et_force_datetime.setText(currentDateTimeString.toString());
