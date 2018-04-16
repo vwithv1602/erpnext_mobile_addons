@@ -101,6 +101,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle("Manifest Upload");
 
         actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
         actv_manifest_customer.addTextChangedListener(new TextWatcher() {
@@ -457,7 +458,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
 
         // Called whenever the API client fails to connect.
 //        Log.d(TAG, "GoogleApiClient connection failed: " + result.toString());
-        Toast.makeText(getApplicationContext(), "Google Drive connection failure: "+result.toString(), Toast.LENGTH_LONG).show();
+//        Toast.makeText(getApplicationContext(), "Google Drive connection failure: "+result.toString(), Toast.LENGTH_LONG).show();
         if (!result.hasResolution()) {
 //            Log.d(TAG, "hasResolution");
 

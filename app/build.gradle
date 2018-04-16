@@ -6,8 +6,8 @@ android {
         applicationId "com.vavcoders.vamc.erpnextmobileaddons"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 8
-        versionName "4.2"
+        versionCode 9
+        versionName "4.3"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
@@ -42,4 +42,14 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-core:2.5.3'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.5.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.5.3'
+
+//    implementation 'com.google.android.gms:play-services-auth:10.2.1'
+    implementation 'pub.devrel:easypermissions:0.3.0'
+    implementation('com.google.api-client:google-api-client-android:1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+    implementation('com.google.apis:google-api-services-youtube:v3-rev193-1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+
 }
