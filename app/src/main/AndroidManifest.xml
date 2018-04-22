@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_VIDEO" />
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
     <uses-feature android:name="android.hardware.camera" />
 
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
@@ -68,11 +69,16 @@
             <!--android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"-->
             <!--android:value="527633323072-mq8i328glc69001esgokrt0ndionrher.apps.googleusercontent.com" />-->
 
-        <meta-data
-            android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"
-            android:value="527633323072-a217jtj67hmr9smft62b992lnqm22msm.apps.googleusercontent.com" />
-
-
+        <!-- >> vwithv1602-->
+        <!--<meta-data-->
+            <!--android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"-->
+            <!--android:value="527633323072-a217jtj67hmr9smft62b992lnqm22msm.apps.googleusercontent.com" />-->
+        <!-- << vwithv1602-->
+        <!-- >> kvkrishna1991-->
+<meta-data
+    android:name="com.google.android.geo.AIzaSyA2vdft9RyeIfEY-iz5gXnocsbWCymhiCg"
+    android:value="527633323072-a217jtj67hmr9smft62b992lnqm22msm.apps.googleusercontent.com"/>
+        <!-- << kvkrishna1991-->
         <!--For Upload to Google Drive-->
         <!--<meta-data-->
             <!--android:name="com.google.android.geo.AIzaSyA1PeENuojoZCXSs1BBqHpUOrBXQt2WB1I"-->

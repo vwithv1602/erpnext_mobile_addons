@@ -109,9 +109,9 @@ public class MainActivity extends AppCompatActivity
 //            fragmentManager.beginTransaction()
 //                    .replace(R.id.content_frame, new ManifestFragment(),"tag_manifest_fragment")
 //                    .commit();
-        }else if (id == R.id.nav_packing_videos_upload) {
-            Intent newAct = new Intent(this, VideoUploadActivity.class);
-            startActivity(newAct);
+//        }else if (id == R.id.nav_packing_videos_upload) {
+//            Intent newAct = new Intent(this, VideoUploadActivity.class);
+//            startActivity(newAct);
         }
 
         else if (id == R.id.nav_settings) {

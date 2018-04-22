@@ -413,7 +413,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         return FileProvider.getUriForFile(this, this.getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(type));
     }
     private static File getOutputMediaFile(int type) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),IMAGE_DIRECTORY_NAME);
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"");
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator
                 + manifest_file_name + ".jpg");
         return mediaFile;
@@ -616,7 +616,7 @@ public class DeliveryActivity extends AppCompatActivity implements GoogleApiClie
         }
     }
     private File getManifestPic(String filename) {
-        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),IMAGE_DIRECTORY_NAME);
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"");
         String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
 
         File file = new File(mediaStorageDir.getPath() + File.separator

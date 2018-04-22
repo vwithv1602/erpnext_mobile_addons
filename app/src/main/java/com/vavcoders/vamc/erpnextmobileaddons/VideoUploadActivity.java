@@ -38,6 +38,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.AssetFileDescriptor;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -71,6 +72,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -86,7 +88,7 @@ public class VideoUploadActivity extends AppCompatActivity
         implements EasyPermissions.PermissionCallbacks {
     private static final String TAG = "VamCLog";
     private String sinv_id;
-    private static String manifest_file_name;
+    private static String manifest_file_name,savedVideoPath;
     GoogleAccountCredential mCredential;
     private TextView mOutputText,tv_manifest_intro_label,tv_form_manifest_dn_label,tv_form_manifest_cust_label;
     private Button mCallApiButton,btn_capture_video,btn_confirm_manifest,btn_try_manifest;
@@ -155,6 +157,8 @@ public class VideoUploadActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle("Packing Video Upload");
+
+
 
         actv_manifest_customer = (AutoCompleteTextView) findViewById(R.id.actv_manifest_customer);
         actv_manifest_customer.addTextChangedListener(new TextWatcher() {
@@ -244,7 +248,7 @@ public class VideoUploadActivity extends AppCompatActivity
             public void onClick(View v) {
                 mCallApiButton.setEnabled(false);
                 mOutputText.setText("");
-                getResultsFromApi();
+//                getResultsFromApi();
                 mCallApiButton.setEnabled(true);
             }
         });
@@ -258,6 +262,11 @@ public class VideoUploadActivity extends AppCompatActivity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+        String youtubeAccount = getPreferences(Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null);
+        if(youtubeAccount==null){
+            chooseAccount();
+        }
     }
     private void captureVideo() {
         Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
@@ -363,6 +372,11 @@ public class VideoUploadActivity extends AppCompatActivity
      * appropriate.
      */
     private void getResultsFromApi() {
+        if(getPreferences(Context.MODE_PRIVATE)
+                .getString(PREF_ACCOUNT_NAME, null)!=null){
+            mCredential.setSelectedAccountName(getPreferences(Context.MODE_PRIVATE)
+                    .getString(PREF_ACCOUNT_NAME, null));
+        }
         if (! isGooglePlayServicesAvailable()) {
             acquireGooglePlayServices();
         } else if (mCredential.getSelectedAccountName() == null) {
@@ -392,7 +406,7 @@ public class VideoUploadActivity extends AppCompatActivity
                     .getString(PREF_ACCOUNT_NAME, null);
             if (accountName != null) {
                 mCredential.setSelectedAccountName(accountName);
-                getResultsFromApi();
+//                getResultsFromApi();
             } else {
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
@@ -430,7 +444,7 @@ public class VideoUploadActivity extends AppCompatActivity
                             "This app requires Google Play Services. Please install " +
                                     "Google Play Services on your device and relaunch this app.");
                 } else {
-                    getResultsFromApi();
+//                    getResultsFromApi();
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -445,42 +459,54 @@ public class VideoUploadActivity extends AppCompatActivity
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
-                        getResultsFromApi();
+//                        getResultsFromApi();
                     }
                 }
                 break;
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
-                    getResultsFromApi();
+//                    getResultsFromApi();
                 }
                 break;
             case CAMERA_CAPTURE_VIDEO_REQUEST_CODE:
                 if(resultCode == RESULT_OK){
                     progressDialog.setMessage("Saving video to device");
                     progressDialog.show();
+
                     /* >> Storing in another location*/
                     try{
-                        AssetFileDescriptor videoAsset = getContentResolver().openAssetFileDescriptor(fileUri, "r");
-                        FileInputStream fis = videoAsset.createInputStream();
-                        File root=new File(Environment.getExternalStorageDirectory(),"ERPNextMobileAddonsVideos");
-
-                        if (!root.exists()) {
-                            root.mkdirs();
-                        }
-
-                        file=new File(root,manifest_file_name+".mp4" );
-                        FileOutputStream fos = new FileOutputStream(file);
-                        byte[] buf = new byte[1024];
-                        int len;
-                        while ((len = fis.read(buf)) > 0) {
-                            fos.write(buf, 0, len);
-                        }
-                        fis.close();
-                        fos.close();
+//                        Log.d(TAG,"1");
+//                        AssetFileDescriptor videoAsset = getContentResolver().openAssetFileDescriptor(fileUri, "r");
+//                        Log.d(TAG,fileUri.getPath());
+//                        FileInputStream fis = videoAsset.createInputStream();
+//                        Log.d(TAG,"3");
+//                        Log.d(TAG,Environment.getExternalStorageDirectory().getAbsolutePath()+"ERPNextMobileAddonsVideos");
+//                        File root=new File(Environment.getExternalStorageDirectory(),"ERPNextMobileAddonsVideos");
+//                        Log.d(TAG,root.getAbsolutePath());
+//                        if (!root.exists()) {
+//                            Log.d(TAG,"in if root not exists");
+//                            root.mkdirs();
+//                        }
+//                        Log.d(TAG,"after if root not exists");
+//
+//                        file=new File(root,manifest_file_name+".mp4" );
+//                        FileOutputStream fos = new FileOutputStream(file);
+//                        byte[] buf = new byte[1024];
+//                        int len;
+//                        while ((len = fis.read(buf)) > 0) {
+//                            fos.write(buf, 0, len);
+//                        }
+//                        fis.close();
+//                        fos.close();
+                        Uri vid = data.getData();
+                        savedVideoPath = getRealPathFromURI(vid);
                         getResultsFromApi();
+//                        MakeRequestTask makeRequestTask = new MakeRequestTask(mCredential);
+//                        makeRequestTask.uploadVideoToYoutube(savedVideoPath);
+
                     }catch (Exception e){
-                        Log.d(TAG,"File storing in another location exception");
-                        Log.d(TAG,e.getMessage());
+//                        Log.d(TAG,"File storing in another location exception");
+//                        Log.d(TAG,e.getMessage());
                     }
 
                     /* << Storing in another location*/
@@ -492,6 +518,15 @@ public class VideoUploadActivity extends AppCompatActivity
                 }
                 break;
         }
+    }
+
+    private String getRealPathFromURI(Uri contentUri) {
+            String[] proj = { MediaStore.Images.Media.DATA };
+            Cursor cursor = managedQuery(contentUri, proj, null, null, null);
+            int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+            cursor.moveToFirst();
+            return cursor.getString(column_index);
+
     }
 
     /**
@@ -615,7 +650,7 @@ public class VideoUploadActivity extends AppCompatActivity
         protected List<String> doInBackground(Void... params) {
             try {
 //                return getDataFromApi();
-                return uploadVideoToYoutube(fileUri.getPath());
+                return uploadVideoToYoutube(savedVideoPath);
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);
@@ -645,8 +680,8 @@ public class VideoUploadActivity extends AppCompatActivity
         }
 
         private List<String> uploadVideoToYoutube(String media_filename) throws IOException{
-            progressDialog.setMessage("Uploading video to youtube");
-            progressDialog.show();
+//            progressDialog.setMessage("Uploading video to youtube");
+//            progressDialog.show();
             try{
                 String mime_type = "video/*";
 //                String media_filename = "sample_video.flv";
@@ -667,11 +702,11 @@ public class VideoUploadActivity extends AppCompatActivity
 
 //                InputStreamContent mediaContent = new InputStreamContent(mime_type,
 //                        VideoUploadActivity.class.getResourceAsStream(Environment.getExternalStorageDirectory().getPath()+"ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4"));
-                FileInputStream fileInputStream = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
+//                FileInputStream fileInputStream = new FileInputStream(Environment.getExternalStorageDirectory().getPath()+"/ERPNextMobileAddonsVideos/"+manifest_file_name+".mp4");
+                FileInputStream fileInputStream = new FileInputStream(savedVideoPath);
                 InputStreamContent mediaContent = new InputStreamContent(mime_type,fileInputStream);
                 YouTube.Videos.Insert videosInsertRequest = mService.videos().insert(parameters.get("part").toString(), video, mediaContent);
                 MediaHttpUploader uploader = videosInsertRequest.getMediaHttpUploader();
-
                 uploader.setDirectUploadEnabled(false);
                 MediaHttpUploaderProgressListener progressListener = new MediaHttpUploaderProgressListener() {
                     public void progressChanged(MediaHttpUploader uploader) throws IOException {
@@ -683,8 +718,6 @@ public class VideoUploadActivity extends AppCompatActivity
                             case MEDIA_IN_PROGRESS:
                                 break;
                             case MEDIA_COMPLETE:
-                                Log.d(TAG,"Upload Completed!");
-
                                 break;
                             case NOT_STARTED:
                                 break;
@@ -705,11 +738,12 @@ public class VideoUploadActivity extends AppCompatActivity
                 });
 
             } catch (GoogleJsonResponseException e) {
-                Log.d(TAG,"In GoogleJsonResponseException");
+//                Log.d(TAG,"In GoogleJsonResponseException");
                 e.printStackTrace();
             } catch (Throwable t) {
-                Log.d(TAG,"In Throwable exception");
-                Log.d(TAG,t.toString());
+//                Log.d(TAG,"In Throwable exception");
+//                Log.d(TAG,t.toString());
+
                 t.printStackTrace();
             }
             return Arrays.asList();
@@ -768,13 +802,12 @@ public class VideoUploadActivity extends AppCompatActivity
                 @Override
                 public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
                     try {
-                        Log.d(TAG,"Response from api: "+response.getString("message"));
                         if(response.getString("message")=="Success"){
 
                         }
                     } catch (JSONException e) {
-                        Log.d(TAG,"Exception raised in update_youtube_link_in_dn api response");
-                        Log.d(TAG,e.getMessage());
+//                        Log.d(TAG,"Exception raised in update_youtube_link_in_dn api response");
+//                        Log.d(TAG,e.getMessage());
                         e.printStackTrace();
                     }
                     progressDialog.setMessage("Completed successfully");
@@ -788,13 +821,13 @@ public class VideoUploadActivity extends AppCompatActivity
                 public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
 //                        Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
                     progressDialog.setMessage("Error occurred in server API. Contact administrator");
-                    Log.d(TAG,"Failure after connecting with server API");
+//                    Log.d(TAG,"Failure after connecting with server API");
                 }
             });
         }catch (Exception e){
 //                Log.d("VamCLog","Exception raised in update_manifest_link_in_dn api call");
             progressDialog.setMessage("Error in connection with server API. Contact administrator");
-            Log.d(TAG,"Exception in connection with server API");
+//            Log.d(TAG,"Exception in connection with server API");
         }
     }
 }
