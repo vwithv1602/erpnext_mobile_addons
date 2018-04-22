@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 // import android.util.Log;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -27,8 +28,10 @@ import java.util.HashMap;
 
 public class SplashActivity extends AppCompatActivity {
     private static final int PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    private static final String TAG = "VamCLog";
 
     DatabaseHelper db;
+
     /**
      * Duration of wait
      **/
@@ -63,15 +66,14 @@ public class SplashActivity extends AppCompatActivity {
                 && checkSelfPermission(Manifest.permission.READ_CALL_LOG) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED
                 && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
-                && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                && checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                && checkSelfPermission(Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED ) {
             requestPermissions(new String[]{Manifest.permission.READ_CALL_LOG,Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_READ_CONTACTS);
         } else {
-
             db = new DatabaseHelper(getApplicationContext());
             Auth loginProfile = db.getLoginProfile();
             Toast.makeText(getApplicationContext(),"Uname: "+loginProfile.getUname(), Toast.LENGTH_LONG).show();
             if(loginProfile.getUname() == null){
-
                 Intent mainIntent = new Intent(SplashActivity.this, PreLoginActivity.class);
                 SplashActivity.this.startActivity(mainIntent);
                 SplashActivity.this.finish();
