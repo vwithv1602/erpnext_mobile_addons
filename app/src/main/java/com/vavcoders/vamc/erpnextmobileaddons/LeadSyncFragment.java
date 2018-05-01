@@ -2,6 +2,7 @@ package com.vavcoders.vamc.erpnextmobileaddons;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
+import android.app.ProgressDialog;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CallLog;
@@ -33,11 +34,13 @@ public class LeadSyncFragment extends Fragment {
     DatabaseHelper db;
     String updated_value;
     EditText et_force_datetime;
+    ProgressDialog progressDialog;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         myView = inflater.inflate(R.layout.activity_home, container, false);
         btn_sync_toggle = myView.findViewById(R.id.btn_sync_toggle);
+        progressDialog = new ProgressDialog(getActivity());
         db = new DatabaseHelper(getActivity());
         String lead_sync_flag = db.getConfigValue(LEAD_SYNC);
 
@@ -74,6 +77,8 @@ public class LeadSyncFragment extends Fragment {
 
             @Override
             public void onClick(View view) {
+                progressDialog.setMessage("Please wait...");
+                progressDialog.show();
                 // clear the database queue table
                 DatabaseHelper dbHelper = new DatabaseHelper(getActivity());
                 dbHelper.deleteLeadsQueue();
@@ -90,6 +95,14 @@ public class LeadSyncFragment extends Fragment {
                     HashMap<String, Date> callsForForcingLeads = getCallDetails(millis);
                     GlobalVariables gv = new GlobalVariables(getActivity());
                     gv.exportCallLog(callsForForcingLeads);
+                    progressDialog.setMessage("Force sync successful");
+                    progressDialog.show();
+                    new android.os.Handler().postDelayed(
+                            new Runnable() {
+                                public void run() {
+                                    progressDialog.hide();
+                                }
+                            }, 1000);
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
