@@ -6,8 +6,8 @@ android {
         applicationId "com.vavcoders.vamc.erpnextmobileaddons"
         minSdkVersion 15
         targetSdkVersion 26
-        versionCode 9
-        versionName "4.3"
+        versionCode 12
+        versionName "4.6"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }
