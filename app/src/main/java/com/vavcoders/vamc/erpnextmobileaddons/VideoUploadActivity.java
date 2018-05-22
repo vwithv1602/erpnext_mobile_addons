@@ -262,6 +262,7 @@ public class VideoUploadActivity extends AppCompatActivity
         mCredential = GoogleAccountCredential.usingOAuth2(
                 getApplicationContext(), Arrays.asList(SCOPES))
                 .setBackOff(new ExponentialBackOff());
+        getResultsFromApi("");
         String youtubeAccount = getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null);
         if(youtubeAccount==null){
@@ -371,7 +372,7 @@ public class VideoUploadActivity extends AppCompatActivity
      * of the preconditions are not satisfied, the app will prompt the user as
      * appropriate.
      */
-    private void getResultsFromApi() {
+    private void getResultsFromApi(String params) {
         if(getPreferences(Context.MODE_PRIVATE)
                 .getString(PREF_ACCOUNT_NAME, null)!=null){
             mCredential.setSelectedAccountName(getPreferences(Context.MODE_PRIVATE)
@@ -384,7 +385,7 @@ public class VideoUploadActivity extends AppCompatActivity
         } else if (! isDeviceOnline()) {
             mOutputText.setText("No network connection available.");
         } else {
-            new MakeRequestTask(mCredential).execute();
+            new MakeRequestTask(mCredential,params).execute();
         }
     }
 
@@ -406,7 +407,7 @@ public class VideoUploadActivity extends AppCompatActivity
                     .getString(PREF_ACCOUNT_NAME, null);
             if (accountName != null) {
                 mCredential.setSelectedAccountName(accountName);
-//                getResultsFromApi();
+                getResultsFromApi("");
             } else {
                 // Start a dialog from which the user can choose an account
                 startActivityForResult(
@@ -444,7 +445,7 @@ public class VideoUploadActivity extends AppCompatActivity
                             "This app requires Google Play Services. Please install " +
                                     "Google Play Services on your device and relaunch this app.");
                 } else {
-//                    getResultsFromApi();
+                    getResultsFromApi("");
                 }
                 break;
             case REQUEST_ACCOUNT_PICKER:
@@ -459,13 +460,13 @@ public class VideoUploadActivity extends AppCompatActivity
                         editor.putString(PREF_ACCOUNT_NAME, accountName);
                         editor.apply();
                         mCredential.setSelectedAccountName(accountName);
-//                        getResultsFromApi();
+                        getResultsFromApi("");
                     }
                 }
                 break;
             case REQUEST_AUTHORIZATION:
                 if (resultCode == RESULT_OK) {
-//                    getResultsFromApi();
+                    getResultsFromApi("");
                 }
                 break;
             case CAMERA_CAPTURE_VIDEO_REQUEST_CODE:
@@ -500,7 +501,7 @@ public class VideoUploadActivity extends AppCompatActivity
 //                        fos.close();
                         Uri vid = data.getData();
                         savedVideoPath = getRealPathFromURI(vid);
-                        getResultsFromApi();
+                        getResultsFromApi("Video");
 //                        MakeRequestTask makeRequestTask = new MakeRequestTask(mCredential);
 //                        makeRequestTask.uploadVideoToYoutube(savedVideoPath);
 
@@ -632,8 +633,10 @@ public class VideoUploadActivity extends AppCompatActivity
     private class MakeRequestTask extends AsyncTask<Void, Void, List<String>> {
         private com.google.api.services.youtube.YouTube mService = null;
         private Exception mLastError = null;
+        private String isVideo = "";
 
-        MakeRequestTask(GoogleAccountCredential credential) {
+        MakeRequestTask(GoogleAccountCredential credential,String isVideoValue) {
+            isVideo = isVideoValue;
             HttpTransport transport = AndroidHttp.newCompatibleTransport();
             JsonFactory jsonFactory = JacksonFactory.getDefaultInstance();
             mService = new com.google.api.services.youtube.YouTube.Builder(
@@ -649,8 +652,11 @@ public class VideoUploadActivity extends AppCompatActivity
         @Override
         protected List<String> doInBackground(Void... params) {
             try {
-//                return getDataFromApi();
-                return uploadVideoToYoutube(savedVideoPath);
+                if(isVideo=="Video"){
+                    return uploadVideoToYoutube(fileUri.getPath());
+                }else{
+                    return getDataFromApi();
+                }
             } catch (Exception e) {
                 mLastError = e;
                 cancel(true);

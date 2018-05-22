@@ -21,11 +21,11 @@
                     android:title="Manifest Upload"
                     android:icon="@drawable/ic_menu_camera"
                     />
-                <!--<item-->
-                    <!--android:id="@+id/nav_packing_videos_upload"-->
-                    <!--android:title="Packing Videos"-->
-                    <!--android:icon="@drawable/ic_videocam"-->
-                    <!--/>-->
+                <item
+                    android:id="@+id/nav_packing_videos_upload"
+                    android:title="Packing Videos"
+                    android:icon="@drawable/ic_videocam"
+                    />
             </menu>
         </item>
     </group>
