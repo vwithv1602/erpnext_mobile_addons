@@ -42,13 +42,13 @@ public class PhoneStateReceiver extends BroadcastReceiver {
                 String lead_sync_flag = db.getConfigValue(LEAD_SYNC);
                 if (lead_sync_flag.equalsIgnoreCase("1")) {
                     HashMap<String, Date> hmIncomingCalls = new HashMap<String, Date>();
-//                    hmIncomingCalls.put(incomingNumber, new Date());
-                    Calendar calander = Calendar.getInstance();
-                    calander.add(Calendar.DATE,-2);
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    String currentDateTimeString = simpleDateFormat.format(calander.getTime());
-                    Long millis = new SimpleDateFormat("yyyy-MM-dd").parse(currentDateTimeString).getTime();
-                    hmIncomingCalls = getCallDetails(millis, context);
+                    hmIncomingCalls.put(incomingNumber, new Date());
+//                    Calendar calander = Calendar.getInstance();
+//                    calander.add(Calendar.DATE,-2);
+//                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//                    String currentDateTimeString = simpleDateFormat.format(calander.getTime());
+//                    Long millis = new SimpleDateFormat("yyyy-MM-dd").parse(currentDateTimeString).getTime();
+//                    hmIncomingCalls = getCallDetails(millis, context);
                     gv.exportCallLog(hmIncomingCalls);
                     Toast.makeText(context, "Converting " + incomingNumber + " to lead", Toast.LENGTH_LONG).show();
                 } else {

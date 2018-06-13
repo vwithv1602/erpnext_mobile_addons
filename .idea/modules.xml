@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ERPNextMobileAddons.iml" filepath="$PROJECT_DIR$/ERPNextMobileAddons.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/erpnext_mobile_addons.iml" filepath="$PROJECT_DIR$/erpnext_mobile_addons.iml" />
     </modules>
   </component>
 </project>
