@@ -6,4 +6,10 @@
         <item>sales@usedyetnew.com</item>
         <item>marketing@usedyetnew.com</item>
     </string-array>
+    <string-array name="pref_google_accounts">
+        <item>visheshhanda@usedyetnew.com</item>
+        <item>care@usedyetnew.com</item>
+        <item>sales@usedyetnew.com</item>
+        <item>marketing@usedyetnew.com</item>
+    </string-array>
 </resources>

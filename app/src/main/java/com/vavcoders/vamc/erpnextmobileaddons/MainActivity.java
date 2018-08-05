@@ -115,6 +115,8 @@ public class MainActivity extends AppCompatActivity
         }
 
         else if (id == R.id.nav_settings) {
+//            Intent newAct = new Intent(this, SettingsActivity.class);
+//            startActivity(newAct);
             fragmentManager.beginTransaction()
                     .replace(R.id.content_frame, new SettingsFragment(),"tag_settings_fragment")
                     .commit();

@@ -34,6 +34,7 @@ import static com.vavcoders.vamc.model.Settings.TABLE_SETTINGS;
 public class DatabaseHelper extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "vav_auth";
+    private static final String TAG = "VamCLog";
     // Database Version
     private static final int DATABASE_VERSION = 1;
     public DatabaseHelper(Context context) {
@@ -107,11 +108,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // looping through all rows and adding to list
         Settings configurations = new Settings();
+        Log.d(TAG,">>>>>");
         if (c.moveToFirst()) {
+            Log.d(TAG,c.getString(c.getColumnIndex(KEY_CONFIG)));
+            Log.d(TAG,c.getString(c.getColumnIndex(KEY_CONFIG_VALUE)));
             configurations.setConfig(c.getString(c.getColumnIndex(KEY_CONFIG)));
             configurations.setConfig_value(c.getString(c.getColumnIndex(KEY_CONFIG_VALUE)));
         }
-
+        Log.d(TAG,"<<<<<");
         return configurations;
     }
     public String getConfigValue(String config){

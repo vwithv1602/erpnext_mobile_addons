@@ -3,8 +3,14 @@
     android:id="@+id/db1_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
-
+    android:orientation="vertical"
+    android:padding="@dimen/text_margin">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Google Account"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="@dimen/text_margin"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -12,9 +18,33 @@
         android:textStyle="bold"
         android:padding="20dp"
         android:text="Choose the google account to which the call log has to be synced. If you don't find the account that you want to sync with, please contact administrator."
-        android:textAlignment="center"/>
+        android:textAlignment="viewStart"
+        android:layout_gravity="start"/>
     <Spinner
         android:id="@+id/google_accounts_spinner"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_marginTop="@dimen/text_margin"
+        android:background="#ccc"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Select company"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginTop="@dimen/text_margin"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:padding="20dp"
+        android:text="Choose the company to which the calls has to be synced. If you don't find your company, please contact administrator."
+        android:textAlignment="viewStart"
+        android:layout_gravity="start"/>
+    <Spinner
+        android:id="@+id/company_spinner"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
