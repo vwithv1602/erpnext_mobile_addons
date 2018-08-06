@@ -105,7 +105,7 @@ public class SplashActivity extends AppCompatActivity {
         }
     }
 
-    private String getDeviceId() {
+    public String getDeviceId() {
         String deviceId = "";
         TelephonyManager tMgr = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {

@@ -1,9 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="planets_array">
-        <item>visheshhanda@usedyetnew.com</item>
-        <item>care@usedyetnew.com</item>
-        <item>sales@usedyetnew.com</item>
-        <item>marketing@usedyetnew.com</item>
-    </string-array>
 </resources>
