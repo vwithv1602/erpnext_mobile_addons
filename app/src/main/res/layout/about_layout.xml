@@ -9,14 +9,31 @@
             android:layout_height="wrap_content"
             android:text="Add ons to make ERPNext entries easy."
             android:textSize="16dp"
+            android:textStyle="bold"
             />
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:id="@+id/version_number"
             android:layout_marginTop="5dp"
-            android:text="Version: 5.8"
+            android:text="@string/version_number"
             android:textSize="16dp"
+            android:textStyle="bold"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Latest Release Features:"
+            android:textStyle="bold"
+            android:layout_marginTop="@dimen/text_margin"
+            />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/release_notes"
+            android:background="@color/bgcolorLightBlue"
+            android:textColor="@color/colorPrimary"
+            android:padding="@dimen/appbtn_padding"
             />
 
 <TextView
@@ -26,5 +43,7 @@
     android:gravity="center"
     android:layout_alignParentBottom="true"
     android:text="developed by vavcoders"
+    android:textColor="@color/colorPrimary"
+    android:textStyle="bold"
     />
 </LinearLayout>

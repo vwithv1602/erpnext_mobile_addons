@@ -54,7 +54,7 @@ public class SettingsFragment extends Fragment {
 
     public Integer google_account_spinner_pos;
     public Spinner google_accounts_spinner,company_spinner;
-    public ArrayAdapter<String> companyAdapter;
+    public ArrayAdapter<String> companyAdapter,googleAccountsAdapter;
     public ArrayAdapter<CharSequence> adapter;
 
     public String URL;
@@ -73,19 +73,36 @@ public class SettingsFragment extends Fragment {
         LOGGED_IN_USER = loginProfile.getUname();
         progressDialog = new ProgressDialog(getActivity());
 
-
-
         // Populating google_accounts_spinner
-        google_accounts_spinner = (Spinner) myView.findViewById(R.id.google_accounts_spinner);
-        adapter = ArrayAdapter.createFromResource(getActivity(),
-                R.array.planets_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        google_accounts_spinner.setAdapter(adapter);
+        populateGoogleAccountSpinner();
 
-        // Populating company_spinner
+        btn_save_settings = myView.findViewById(R.id.btn_save_settings);
+        btn_save_settings.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                String selected_google_account = (String) google_accounts_spinner.getSelectedItem();
+                String selected_company = (String) company_spinner.getSelectedItem();
+                GlobalVariables gv = new GlobalVariables(getActivity());
+                JSONObject settingsObj = new JSONObject();
+                try {
+                    settingsObj.put("selected_google_account",selected_google_account);
+                    settingsObj.put("selected_company",selected_company);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(myView.getContext(),"Exception in settings object creation while saving", Toast.LENGTH_LONG).show();
+                }
+                gv.saveSettings(settingsObj);
+                Settings settings = gv.getAllSettings();
+            }
+        });
+        return myView;
+    }
+
+    private void populateCompanySpinner() {
         String generatedURL = "http://" + URL + "/api/method/erpnext_mobile_addons.get_companies";
         AsyncHttpClient client = new AsyncHttpClient();
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage("Fetching companies...");
         progressDialog.show();
         try {
             client.get(generatedURL,new JsonHttpResponseHandler(){
@@ -105,7 +122,6 @@ public class SettingsFragment extends Fragment {
                         companyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         company_spinner.setAdapter(companyAdapter);
                         populateSettings();
-                        progressDialog.hide();
                         // set after getting response from api for imei
 //                        int spinnerPosition = companyAdapter.getPosition("Usedyetnew");
 //                        company_spinner.setSelection(spinnerPosition);
@@ -123,40 +139,53 @@ public class SettingsFragment extends Fragment {
         }catch (Exception e){
             Toast.makeText(myView.getContext(),"Exception: ", Toast.LENGTH_LONG).show();
         }
+    }
 
-        btn_save_settings = myView.findViewById(R.id.btn_save_settings);
-        btn_save_settings.setOnClickListener(new View.OnClickListener() {
+    private void populateGoogleAccountSpinner() {
+        String generatedURL = "http://" + URL + "/api/method/erpnext_mobile_addons.get_google_accounts";
+        AsyncHttpClient client = new AsyncHttpClient();
+        progressDialog.setMessage("Fetching google accounts...");
+        progressDialog.show();
+        try {
+            client.get(generatedURL,new JsonHttpResponseHandler(){
 
-            @Override
-            public void onClick(View view) {
-                String selected_google_account = (String) google_accounts_spinner.getSelectedItem();
-                String selected_company = (String) company_spinner.getSelectedItem();
-                GlobalVariables gv = new GlobalVariables(getActivity());
-                JSONObject settingsObj = new JSONObject();
-                try {
-                    settingsObj.put("selected_google_account",selected_google_account);
-                    settingsObj.put("selected_company",selected_company);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Toast.makeText(myView.getContext(),"Exception in settings object creation while saving", Toast.LENGTH_LONG).show();
+                @Override
+                public void onSuccess(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response) {
+                    try {
+                        JSONArray companyJson = response.getJSONArray("message");
+                        List<String> companies = new ArrayList<>();
+                        googleAccountsAdapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1, companies);
+                        googleAccountsAdapter.clear();
+                        for(i=0;i<companyJson.length();i++){
+                            googleAccountsAdapter.add(companyJson.getJSONObject(i).getString("email"));
+                        }
+                        google_accounts_spinner = (Spinner) myView.findViewById(R.id.google_accounts_spinner);
+
+                        googleAccountsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        google_accounts_spinner.setAdapter(googleAccountsAdapter);
+                        // Populating company_spinner
+                        populateCompanySpinner();
+                        // set after getting response from api for imei
+//                        int spinnerPosition = googleAccountsAdapter.getPosition("Usedyetnew");
+//                        google_accounts_spinner.setSelection(spinnerPosition);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(myView.getContext(),"Exception in fetching companies", Toast.LENGTH_LONG).show();
+                        progressDialog.hide();
+                    }
                 }
-                gv.saveSettings(settingsObj);
-                Log.d(TAG,"getAllSettings init");
-                Settings settings = gv.getAllSettings();
-                Log.d(TAG,"getAllSettings end");
-                Log.d(TAG,settings.toString());
-                Log.d(TAG,settings.getConfig());
-                Log.d(TAG,settings.getConfig_value());
 
-                // 3. save company settings against imei but not email
-                // 4. save company settings in sqlite DB
-            }
-        });
-        return myView;
+                public void onFailure(int i, cz.msebera.android.httpclient.Header[] headers, org.json.JSONObject response, Throwable throwable) {
+                    Toast.makeText(myView.getContext(),"error: ", Toast.LENGTH_LONG).show();
+                }
+            });
+        }catch (Exception e){
+            Toast.makeText(myView.getContext(),"Exception: ", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void populateSettings() {
-        progressDialog.setMessage("Please wait...");
+        progressDialog.setMessage("Obtaining settings...");
         progressDialog.show();
         String generatedURL = "http://" + URL + "/api/method/erpnext_mobile_addons.fetch_settings";
         AsyncHttpClient client = new AsyncHttpClient();
@@ -178,7 +207,7 @@ public class SettingsFragment extends Fragment {
                         // set after getting response from api for imei
                         int companySpinnerPosition = companyAdapter.getPosition(settingsJson.getJSONObject(0).get("company").toString());
                         company_spinner.setSelection(companySpinnerPosition);
-                        int gAccountSpinnerPosition = adapter.getPosition(settingsJson.getJSONObject(0).get("google_account").toString());
+                        int gAccountSpinnerPosition = googleAccountsAdapter.getPosition(settingsJson.getJSONObject(0).get("google_account").toString());
                         google_accounts_spinner.setSelection(gAccountSpinnerPosition);
                         progressDialog.hide();
                     } catch (JSONException e) {
