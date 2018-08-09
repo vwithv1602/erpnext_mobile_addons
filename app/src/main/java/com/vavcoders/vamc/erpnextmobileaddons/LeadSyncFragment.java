@@ -7,12 +7,15 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.vavcoders.vamc.helper.DatabaseHelper;
 import com.vavcoders.vamc.model.Settings;
@@ -111,6 +114,14 @@ public class LeadSyncFragment extends Fragment {
 
             }
         });
+        String URL = new GlobalVariables(getActivity()).URL;
+        if(!URL.equalsIgnoreCase("52.14.181.220")){
+            NavigationView navigationView = (NavigationView) getActivity().findViewById(R.id.nav_view);
+            Menu nav_menu = navigationView.getMenu();
+            nav_menu.findItem(R.id.nav_dn_plus).setVisible(false);
+            nav_menu.findItem(R.id.nav_manifest_upload).setVisible(false);
+            nav_menu.findItem(R.id.nav_packing_videos_upload).setVisible(false);
+        }
         return myView;
     }
     private HashMap<String, Date> getCallDetails(Long greaterThan) {

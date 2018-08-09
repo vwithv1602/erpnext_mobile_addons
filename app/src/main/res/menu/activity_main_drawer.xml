@@ -14,7 +14,8 @@
             </menu>
         </item>
         <item
-            android:title="Delivery Notes Plus">
+            android:title="Delivery Notes Plus"
+            android:id="@+id/nav_dn_plus">
             <menu>
                 <item
                     android:id="@+id/nav_manifest_upload"
